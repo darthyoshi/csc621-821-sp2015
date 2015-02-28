@@ -1,5 +1,5 @@
 # visualize
-### A group project for CSC621
+
 
 #### ITK/VTK Crash Course
 
@@ -43,6 +43,39 @@ that implements the procedure and should close an associated GitHub issue.
 2.  Registration
 3.  Segmentation
 4.  Visualization
+
+#### C++11 Support
+
+ITK/VTK make extensive use of templates and ridiculously long typenames.
+Seriously, some fully qualified types will fill up an entire line. Rather than
+suffer the anguish of having to constantly `typedef` everything over and over,
+we can make use of the C++11 standard's `auto` keyword that allows the compiler
+to "fill in the blank" for what type we're using in certain cases. For
+instance:
+
+```cpp
+UnnecessarilyLongTypeName::WithAMysteriousTemplateParameter<3>
+x = getThing();
+
+// becomes...
+
+auto x = getThing();
+```
+
+It's beautiful. However, it requires that you compile ITK with some specific
+options turned on. Assuming you've downloaded the [ITK
+source](http://www.itk.org/ITK/resources/software.html) to a directory named
+`~/ITK`:
+
+```
+mkdir ITK-build && cd ITK-build
+cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DVCL_INCLUDE_CXX_0X:BOOL=ON ../ITK
+make && make install
+```
+
+If you experience any issues with this process, try a completely clean build by
+just recreating the build directory and trying again. If that doesn't solve it,
+just post an issue.
 
 #### Building
 

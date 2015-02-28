@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
  
 project(visualize)
  
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive")
+set(EXECUTABLE_OUTPUT_PATH ${visualize_BINARY_DIR}/bin)
+
 find_package(ITK REQUIRED)
 include(${ITK_USE_FILE})
 if (ITKVtkGlue_LOADED)
@@ -13,4 +16,4 @@ else()
     set(Glue ItkVtkGlue)
 endif()
 
-add_subdirectory(${visualize_SOURCE_DIR}/source)
+add_subdirectory(source)

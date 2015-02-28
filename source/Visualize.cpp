@@ -1,8 +1,13 @@
+// Bootstrap the logger.
+#include "easylogging++.h"
+#define ELPP_STL_LOGGING 1
+INITIALIZE_EASYLOGGINGPP
 
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkRescaleIntensityImageFilter.h"
 
+#include "DICOMSeries.h"
 #include "QuickView.h"
 
 typedef itk::Image<unsigned char, 2> ImageType;
@@ -10,6 +15,18 @@ typedef itk::Image<unsigned char, 2> ImageType;
 static void GenerateImage(ImageType* const image);
 
 int main(int argc, char* argv[]) {
+  // Configure the logger.
+  el::Configurations conf;
+  conf.setGlobally(el::ConfigurationType::Format, "[%logger] %level: %msg");
+  conf.setGlobally(el::ConfigurationType::Filename, "/tmp/logs/visualize.log");
+  el::Loggers::setDefaultConfigurations(conf, true);
+  el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
+  el::Loggers::addFlag(el::LoggingFlag::CreateLoggerAutomatically);
+  el::Loggers::addFlag(el::LoggingFlag::AutoSpacing);
+
+  DICOMSeries dcms(argv[1]);
+  dcms.Load();
+
   ImageType::Pointer image = ImageType::New();
   GenerateImage(image);
 
