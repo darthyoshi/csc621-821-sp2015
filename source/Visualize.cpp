@@ -3,16 +3,21 @@
 #define ELPP_STL_LOGGING 1
 INITIALIZE_EASYLOGGINGPP
 
-#include "itkImage.h"
-#include "itkImageFileReader.h"
-#include "itkRescaleIntensityImageFilter.h"
+#include <itkImage.h>
+#include <itkImageFileReader.h>
+#include <itkRescaleIntensityImageFilter.h>
+
+#include <vtkImageData.h>
+#include <vtkSmartPointer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkRenderer.h>
+#include <vtkImageMapper.h>
+#include <vtkActor2D.h>
+#include <vtkImageSlice.h>
 
 #include "DICOMSeries.h"
-#include "QuickView.h"
-
-typedef itk::Image<unsigned char, 2> ImageType;
-
-static void GenerateImage(ImageType* const image);
 
 int main(int argc, char* argv[]) {
   // Configure the logger.
@@ -27,33 +32,36 @@ int main(int argc, char* argv[]) {
   DICOMSeries dcms(argv[1]);
   dcms.Load();
 
-  ImageType::Pointer image = ImageType::New();
-  GenerateImage(image);
+  auto window = vtkSmartPointer<vtkRenderWindow>::New();
+  auto renderer = vtkSmartPointer<vtkRenderer>::New();
+  renderer->SetBackground(0.5f, 0.5f, 1.0f);
 
-  QuickView viewer;
-  viewer.AddImage(image.GetPointer());
-  viewer.Visualize();
+  window->AddRenderer(renderer);
+  window->SetSize(1280, 1024);
+
+  auto style = vtkSmartPointer<vtkInteractorStyleImage>::New();
+  auto interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  interactor->SetInteractorStyle(style);
+  interactor->SetRenderWindow(window);
+
+  
+  // Map the image to the surface.
+  auto image = dcms.GetSlice(2);
+  auto mapper = vtkSmartPointer<vtkImageMapper>::New();
+  mapper->SetInputData(image);
+  mapper->SetColorWindow(255);
+  mapper->SetColorLevel(127.5);
+
+  auto actor = vtkSmartPointer<vtkActor2D>::New();
+  actor->SetMapper(mapper);
+  actor->SetPosition(20, 20);
+
+  renderer->AddActor2D(actor);
+
+  // Verify context.
+  window->Render();
+  interactor->Start();
 
   return EXIT_SUCCESS;
 }
-
-void GenerateImage(ImageType* const image) {
-  ImageType::IndexType corner = {{0, 0}};
-  ImageType::SizeType size;
-
-  size[0] = 200;
-  size[1] = 300;
-
-  ImageType::RegionType region(corner, size);
-  image->SetRegions(region);
-  image->Allocate();
-
-  for (unsigned int r = 40; r < 100; r++) {
-    for (unsigned int c = 40;  c < 100; c++) {
-      ImageType::IndexType pixelIndex {r, c};
-      image->SetPixel(pixelIndex, 15);
-    }
-  }
-}
-
 

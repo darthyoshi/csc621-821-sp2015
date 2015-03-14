@@ -5,7 +5,9 @@ DICOMSeries::DICOMSeries(const std::string path) : m_path(path) {
   CLOG(INFO, "io") << "Mounted" << m_path << "as DICOM directory.";
 }
 
-DICOMSeries::~DICOMSeries() {}
+DICOMSeries::~DICOMSeries() {
+
+}
 
 void DICOMSeries::Load() {
   CLOG(INFO, "io") << "Loading" << m_path << "as DICOM data.";
@@ -35,14 +37,21 @@ void DICOMSeries::Load() {
   auto dictionary = (*(reader->GetMetaDataDictionaryArray()))[0];
   itk::ExposeMetaData<std::string>(*dictionary, "0020|000d", m_studyID);
   itk::ExposeMetaData<std::string>(*dictionary, "0008|0016", m_sopUID);
+  m_handle = reader;
 
   // Yay! We successfully loaded a DICOM directory.
   CLOG(INFO, "io") << "Loaded" << filenames.size() << "images in series.";
   CLOG(INFO, "io") << "Size:" << m_size;
   CLOG(INFO, "io") << "Spacing:" << m_spacing;
+  CLOG(INFO, "io") << "SOP ID:" << m_studyID;
+}
 
-  for (auto x : dictionary->GetKeys()) {
-    CLOG(INFO, "io") << x;
-  }
+DICOMSeries::Slice DICOMSeries::GetSlice(unsigned int z) {
+  Converter::Pointer convert = Converter::New();
+  convert->SetInput(m_handle->GetOutput());
+  convert->Update();
 
+  Slice image = Slice::New();
+  image->ShallowCopy(convert->GetOutput());
+  return image;
 }
