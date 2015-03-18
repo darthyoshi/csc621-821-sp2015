@@ -1,3 +1,9 @@
+/**
+ * @file CineViewer.cxx
+ * @author Kay Choi
+ * @description Implementation of CineViewer class.
+ */
+
 #include <vtkSmartPointer.h>
 #include <vtkObjectFactory.h>
 #include <vtkImageViewer2.h>
@@ -18,6 +24,34 @@ void CineViewer::Init(char* dirName) {
     _ImageViewer = vtkSmartPointer<vtkImageViewer2>::New();
     _ImageViewer->SetInputConnection(reader->GetOutputPort());
 
+    SetSlices();
+}
+
+/**
+ * Initializes the CineViewer.
+ * @param reader a image reader with the desired DICOM images
+ */
+void CineViewer::Init(vtkDICOMImageReader* reader) {
+    _ImageViewer = vtkSmartPointer<vtkImageViewer2>::New();
+    _ImageViewer->SetInputConnection(reader->GetOutputPort());
+
+    SetSlices();
+}
+
+/**
+ * Initializes the CineViewer.
+ * @param viewer an image viewer with the desired DICOM images
+ */
+void Init(vtkImageViewer2* viewer) {
+    _ImageViewer = viewer;
+
+    SetSlices();
+}
+
+/**
+ * Sets the private slice variables.
+ */
+void CineViewer::SetSlices() {
     _MinSlice = _ImageViewer->GetSliceMin();
     _MaxSlice = _ImageViewer->GetSliceMax();
     _Slice = _MinSlice;
