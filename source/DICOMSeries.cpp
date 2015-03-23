@@ -46,7 +46,7 @@ void DICOMSeries::Load() {
   CLOG(INFO, "io") << "SOP ID:" << m_studyID;
 }
 
-DICOMSeries::Slice DICOMSeries::GetSlice(unsigned int z) {
+DICOMSeries::ImageType* DICOMSeries::GetOutput() {
   Converter::Pointer convert = Converter::New();
   convert->SetInput(m_handle->GetOutput());
   convert->Update();

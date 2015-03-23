@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 
   
   // Map the image to the surface.
-  auto image = dcms.GetSlice(2);
+  auto image = dcms.GetOutput();
   auto mapper = vtkSmartPointer<vtkImageMapper>::New();
   mapper->SetInputData(image);
   mapper->SetColorWindow(255);
