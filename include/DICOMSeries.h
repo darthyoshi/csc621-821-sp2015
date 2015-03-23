@@ -34,7 +34,7 @@ class DICOMSeries {
     ~DICOMSeries();
 
     void Load();
-    Slice GetSlice(unsigned int);
+    ImageType* GetOutput();
 
   private:
     std::string m_path;
