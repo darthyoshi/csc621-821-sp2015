@@ -18,9 +18,6 @@
 
 class DICOMSeries {
 
-  public:
-    typedef vtkSmartPointer<vtkImageData> Slice;
-        
   private:
     typedef signed short PixelType;
     typedef itk::Image<PixelType, 3> ImageType;

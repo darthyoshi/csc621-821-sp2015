@@ -77,6 +77,18 @@ If you experience any issues with this process, try a completely clean build by
 just recreating the build directory and trying again. If that doesn't solve it,
 just post an issue.
 
+#### Qt Support
+
+In order to make interface design and user interaction a bit simpler, this
+project uses Qt and VTK in combination for visualization. In order to build the
+project, please make sure your VTK installation was built with the appropriate
+options specified
+[here](http://www.vtk.org/Wiki/VTK/Configure_and_Build#Configure_with_Qt).
+
+Those working on the interface team may wish to install Qt Designer and the
+relevant VTK plugins as documented
+[here](http://www.vtk.org/Wiki/VTK/Tutorials/QtSetup). 
+
 #### Building
 
 CMake advocates against in-source builds, meaning you should build the project

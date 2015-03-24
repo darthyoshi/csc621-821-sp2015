@@ -5,9 +5,7 @@ DICOMSeries::DICOMSeries(const std::string path) : m_path(path) {
   CLOG(INFO, "io") << "Mounted" << m_path << "as DICOM directory.";
 }
 
-DICOMSeries::~DICOMSeries() {
-
-}
+DICOMSeries::~DICOMSeries() {}
 
 void DICOMSeries::Load() {
   CLOG(INFO, "io") << "Loading" << m_path << "as DICOM data.";
@@ -47,11 +45,5 @@ void DICOMSeries::Load() {
 }
 
 DICOMSeries::ImageType* DICOMSeries::GetOutput() {
-  Converter::Pointer convert = Converter::New();
-  convert->SetInput(m_handle->GetOutput());
-  convert->Update();
-
-  Slice image = Slice::New();
-  image->ShallowCopy(convert->GetOutput());
-  return image;
+  return m_handle->GetOutput();
 }

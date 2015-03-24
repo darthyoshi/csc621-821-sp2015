@@ -3,21 +3,9 @@
 #define ELPP_STL_LOGGING 1
 INITIALIZE_EASYLOGGINGPP
 
-#include <itkImage.h>
-#include <itkImageFileReader.h>
-#include <itkRescaleIntensityImageFilter.h>
+#include <QApplication>
 
-#include <vtkImageData.h>
-#include <vtkSmartPointer.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkInteractorStyleImage.h>
-#include <vtkRenderer.h>
-#include <vtkImageMapper.h>
-#include <vtkActor2D.h>
-#include <vtkImageSlice.h>
-
-#include "DICOMSeries.h"
+#include "Window.h"
 
 int main(int argc, char* argv[]) {
   // Configure the logger.
@@ -29,39 +17,13 @@ int main(int argc, char* argv[]) {
   el::Loggers::addFlag(el::LoggingFlag::CreateLoggerAutomatically);
   el::Loggers::addFlag(el::LoggingFlag::AutoSpacing);
 
-  DICOMSeries dcms(argv[1]);
-  dcms.Load();
+  QApplication app(argc, argv);
+  app.setOrganizationName("Group Wind");
+  app.setApplicationName("Visualization Example");
 
-  auto window = vtkSmartPointer<vtkRenderWindow>::New();
-  auto renderer = vtkSmartPointer<vtkRenderer>::New();
-  renderer->SetBackground(0.5f, 0.5f, 1.0f);
+  Window window;
+  window.showMaximized();
+  window.show();
 
-  window->AddRenderer(renderer);
-  window->SetSize(1280, 1024);
-
-  auto style = vtkSmartPointer<vtkInteractorStyleImage>::New();
-  auto interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-  interactor->SetInteractorStyle(style);
-  interactor->SetRenderWindow(window);
-
-  
-  // Map the image to the surface.
-  auto image = dcms.GetOutput();
-  auto mapper = vtkSmartPointer<vtkImageMapper>::New();
-  mapper->SetInputData(image);
-  mapper->SetColorWindow(255);
-  mapper->SetColorLevel(127.5);
-
-  auto actor = vtkSmartPointer<vtkActor2D>::New();
-  actor->SetMapper(mapper);
-  actor->SetPosition(20, 20);
-
-  renderer->AddActor2D(actor);
-
-  // Verify context.
-  window->Render();
-  interactor->Start();
-
-  return EXIT_SUCCESS;
-}
-
+  return app.exec();
+};

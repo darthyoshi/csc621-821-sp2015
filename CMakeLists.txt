@@ -16,4 +16,7 @@ else()
     set(Glue ItkVtkGlue)
 endif()
 
+set(CMAKE_AUTOMOC ON)
+find_package(Qt5Widgets REQUIRED)
+
 add_subdirectory(source)
