@@ -42,7 +42,7 @@ void CineViewer::Init(vtkDICOMImageReader* reader) {
  * Initializes the CineViewer.
  * @param viewer an image viewer with the desired DICOM images
  */
-void Init(vtkImageViewer2* viewer) {
+void CineViewer::Init(vtkImageViewer2* viewer) {
     _ImageViewer = viewer;
 
     SetSlices();
