@@ -8,8 +8,19 @@ set(EXECUTABLE_OUTPUT_PATH ${visualize_BINARY_DIR}/bin)
 find_package(ITK REQUIRED)
 include(${ITK_USE_FILE})
 if (ITKVtkGlue_LOADED)
-  find_package(VTK REQUIRED)
-  include(${VTK_USE_FILE})
+find_package(VTK COMPONENTS
+    vtkInteractionImage
+    vtkGUISupportQt
+    vtkRenderingCore
+    vtkRenderingFreeTypeOpenGL
+    vtkCommonCore
+    vtkFiltersCore
+    vtkInfovisCore
+    vtkInteractionStyle
+    vtkViewsQt
+    NO_MODULE
+    REQUIRED
+  )
 else()
   find_package(ItkVtkGlue REQUIRED)
   include(${ItkVtkGlue_USE_FILE})
