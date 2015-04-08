@@ -1,0 +1,1 @@
+/Applications/ITK/Segmentor_test/bin/CMakeFiles/test.dir
