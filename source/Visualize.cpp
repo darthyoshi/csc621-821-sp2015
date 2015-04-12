@@ -22,9 +22,9 @@ int main(int argc, char* argv[]) {
   app.setOrganizationName("Group Wind");
   app.setApplicationName("Visualization Example");
 
-  Window window;
-  window.showMaximized();
-  window.show();
+  Register register;
+  register.showMaximized();
+  register.show();
 
 /*
   Window1 windowOne;
