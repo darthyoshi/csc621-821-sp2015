@@ -27,7 +27,8 @@ class Register : public QMainWindow {
     int LoadDICOM2();
 
   private:
-    vtkImageViewer2* m_view;
+    vtkImageViewer2* m_viewLeft;
+    vtkImageViewer2* m_viewRight;
     Ui::MainWindow* m_ui;
 };
 

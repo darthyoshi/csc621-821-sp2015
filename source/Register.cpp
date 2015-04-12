@@ -71,13 +71,13 @@ int Register::LoadDICOM() {
   vtkImageData* image = vtkImageData::New();
   image->DeepCopy(connector->GetOutput());
 
-  m_ui->QVTKMain->SetRenderWindow(m_view->GetRenderWindow());
-  m_view->SetupInteractor(m_ui->QVTKMain->GetRenderWindow()->GetInteractor());
+  m_ui->QVTKMain->SetRenderWindow(m_viewLeft->GetRenderWindow());
+  m_viewLeft->SetupInteractor(m_ui->QVTKMain->GetRenderWindow()->GetInteractor());
 
-  m_view->SetInputData(image);
-  m_view->SetSlice(m_view->GetSliceMax() / 2);
-  m_view->GetRenderer()->ResetCamera();
-  m_view->Render();
+  m_viewLeft->SetInputData(image);
+  m_viewLeft->SetSlice(m_view->GetSliceMax() / 2);
+  m_viewLeft->GetRenderer()->ResetCamera();
+  m_viewLeft->Render();
 
   m_ui->QVTKMain->update();
   return EXIT_SUCCESS;
@@ -124,13 +124,13 @@ int Register::LoadDICOM2() {
   vtkImageData* image = vtkImageData::New();
   image->DeepCopy(connector->GetOutput());
 
-  m_ui->QVTKMain2->SetRenderWindow(m_view->GetRenderWindow());
-  m_view->SetupInteractor(m_ui->QVTKMain2->GetRenderWindow()->GetInteractor());
+  m_ui->QVTKMain2->SetRenderWindow(m_viewRight->GetRenderWindow());
+  m_viewRight->SetupInteractor(m_ui->QVTKMain2->GetRenderWindow()->GetInteractor());
 
-  m_view->SetInputData(image);
-  m_view->SetSlice(m_view->GetSliceMax() / 2);
-  m_view->GetRenderer()->ResetCamera();
-  m_view->Render();
+  m_viewRight->SetInputData(image);
+  m_viewRight->SetSlice(m_view->GetSliceMax() / 2);
+  m_viewRight->GetRenderer()->ResetCamera();
+  m_viewRight->Render();
 
   m_ui->QVTKMain2->update();
   return EXIT_SUCCESS;
