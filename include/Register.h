@@ -1,7 +1,7 @@
 #ifndef Register_H
 #define Register_H
 
-#include <QMainRegister>
+#include <QMainWindow>
 
 #include <vtkSmartPointer.h>
 
