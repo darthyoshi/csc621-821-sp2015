@@ -5,8 +5,8 @@ INITIALIZE_EASYLOGGINGPP
 
 #include <QApplication>
 
-#include "Window.h"
-#include "Window1.h"
+#include "Register.h"
+#include "Segment.h"
 
 int main(int argc, char* argv[]) {
   // Configure the logger.

@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef SEGMENT_H
+#define SEGMENT_H
 
 #include <QMainWindow>
 
@@ -14,17 +14,16 @@ class vtkResliceImageViewer;
 
 namespace Ui { class MainWindow; }
 
-class Window : public QMainWindow {
+class Segment : public QMainWindow {
 
   Q_OBJECT
 
   public:
-    Window(QWidget* parent = 0);
-    ~Window();
+    Segment(QWidget* parent = 0);
+    ~Segment();
 
   private slots:
     int LoadDICOM();
-    int LoadDICOM2();
 
   private:
     vtkImageViewer2* m_view;

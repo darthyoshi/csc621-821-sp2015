@@ -1,7 +1,7 @@
-#ifndef WINDOW1_H
-#define WINDOW1_H
+#ifndef Register_H
+#define Register_H
 
-#include <QMainWindow>
+#include <QMainRegister>
 
 #include <vtkSmartPointer.h>
 
@@ -14,16 +14,17 @@ class vtkResliceImageViewer;
 
 namespace Ui { class MainWindow; }
 
-class Window1 : public QMainWindow {
+class Register : public QMainWindow {
 
   Q_OBJECT
 
   public:
-    Window1(QWidget* parent = 0);
-    ~Window1();
+    Register(QWidget* parent = 0);
+    ~Register();
 
   private slots:
     int LoadDICOM();
+    int LoadDICOM2();
 
   private:
     vtkImageViewer2* m_view;
