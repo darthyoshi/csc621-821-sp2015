@@ -25,5 +25,9 @@ int main(int argc, char* argv[]) {
   window.showMaximized();
   window.show();
 
+  Window1 windowOne;
+  windowOne.showMaximized();
+  windowOne.show();
+
   return app.exec();
 };
