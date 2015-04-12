@@ -18,7 +18,8 @@
 
 Register::Register(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow()) {
   m_ui->setupUi(this);
-  m_view = vtkImageViewer2::New();
+  m_viewLeft = vtkImageViewer2::New();
+  m_viewRight = vtkImageViewer2::New();
 
   connect(m_ui->actionOpen_First_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOM()));
   connect(m_ui->actionOpen_Second_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOM2()));
@@ -75,7 +76,7 @@ int Register::LoadDICOM() {
   m_viewLeft->SetupInteractor(m_ui->QVTKMain->GetRenderWindow()->GetInteractor());
 
   m_viewLeft->SetInputData(image);
-  m_viewLeft->SetSlice(m_view->GetSliceMax() / 2);
+  m_viewLeft->SetSlice(m_viewLeft->GetSliceMax() / 2);
   m_viewLeft->GetRenderer()->ResetCamera();
   m_viewLeft->Render();
 
@@ -128,7 +129,7 @@ int Register::LoadDICOM2() {
   m_viewRight->SetupInteractor(m_ui->QVTKMain2->GetRenderWindow()->GetInteractor());
 
   m_viewRight->SetInputData(image);
-  m_viewRight->SetSlice(m_view->GetSliceMax() / 2);
+  m_viewRight->SetSlice(m_viewRight->GetSliceMax() / 2);
   m_viewRight->GetRenderer()->ResetCamera();
   m_viewRight->Render();
 
