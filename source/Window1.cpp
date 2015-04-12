@@ -14,7 +14,7 @@
 
 #include "easylogging++.h"
 #include "Window1.h"
-#include "ui_Window.h"
+#include "ui_Window1.h"
 
 Window1::Window1(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow()) {
   m_ui->setupUi(this);
