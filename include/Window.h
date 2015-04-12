@@ -24,6 +24,7 @@ class Window : public QMainWindow {
 
   private slots:
     int LoadDICOM();
+    int LoadDICOM2();
 
   private:
     vtkImageViewer2* m_view;
