@@ -5,6 +5,7 @@ RegWindow::RegWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::RegMai
   m_viewLeft = vtkImageViewer2::New();
   m_viewRight = vtkImageViewer2::New();
 <<<<<<< HEAD:source/RegWindow.cpp
+<<<<<<< HEAD:source/RegWindow.cpp
   readerFixed = Reader::New();
   readerMoving = Reader::New();
 =======
@@ -13,6 +14,11 @@ RegWindow::RegWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::RegMai
   connect(m_ui->actionOpen_Second_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOM2()));
 >>>>>>> f96dc9c6ae5d2f40e53e293f8be5af41d5df2231:source/Register.cpp
 
+=======
+  readerFixed = Reader::New();
+  readerMoving = Reader::New();
+
+>>>>>>> a92cf6e683056f1657163147061a540768503447:source/RegWindow.cpp
   //connect(m_ui->actionOpen_First_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOMFixed()));
   //connect(m_ui->actionOpen_Second_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOMMoving()));
   connect(m_ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
