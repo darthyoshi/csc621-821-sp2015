@@ -5,8 +5,7 @@ INITIALIZE_EASYLOGGINGPP
 
 #include <QApplication>
 
-#include "RegWindow.h"
-#include "SegWindow.h"
+#include "MainWindow.h"
 
 int main(int argc, char* argv[]) {
   // Configure the logger.
@@ -20,15 +19,10 @@ int main(int argc, char* argv[]) {
 
   QApplication app(argc, argv);
   app.setOrganizationName("Group Wind");
-  app.setApplicationName("Visualization Example");
+  app.setApplicationName("Reg/Seg/Vis");
 
-  RegWindow regWindow;
-  regWindow.showMaximized();
-  regWindow.show();
-
-  SegWindow segWindow;
-  segWindow.showMaximized();
-  segWindow.show();
+  MainWindow mainWindow;
+  mainWindow.showMaximized();
 
   return app.exec();
 };

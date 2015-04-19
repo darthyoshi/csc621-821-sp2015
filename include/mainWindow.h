@@ -1,5 +1,5 @@
-#ifndef REGWINDOW_H
-#define REGWINDOW_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <QMainWindow>
 #include <QFileDialog>
@@ -21,7 +21,9 @@
 #include <itkImageToVTKImageFilter.h>
 
 #include "easylogging++.h"
-#include "ui_RegWindow.h"
+#include "ui_MainWindow.h"
+
+#include "Segment.h"
 
 class QAction;
 class QMenu;
@@ -35,31 +37,44 @@ const int DIMS = 3;
 typedef itk::Image<InputPixel, DIMS> InputImage;
 typedef itk::ImageSeriesReader<InputImage> Reader;
 
-namespace Ui { class RegMainWindow; }
 
-class RegWindow : public QMainWindow {
+namespace Ui {
+class MainWindow;
+}
 
-  Q_OBJECT
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
 
-  public:
-    RegWindow(QWidget* parent = 0);
-    ~RegWindow();
+public:
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
 
-  private slots:
-    void on_pushButton_OpenFixed_clicked();
-    void on_pushButton_OpenMoving_clicked();
+private slots:
+    void on_pushButton_SelectFixedDir_clicked();
+
+    void on_pushButton_SelectMovingDir_clicked();
+
+    void on_pushButton_Register_clicked();
+
+    void on_pushButton_SelectSegDir_clicked();
+
+    void on_pushButton_Segment_clicked();
 
 private:
+    Ui::MainWindow *ui;
+
     int LoadDICOMFixed();
     int LoadDICOMMoving();
+    int LoadDICOMSeg();
 
     vtkImageViewer2* m_viewLeft;
     vtkImageViewer2* m_viewRight;
-    Ui::RegMainWindow* m_ui;
+    vtkImageViewer2* m_viewSeg;
 
     Reader::Pointer readerFixed;
     Reader::Pointer readerMoving;
-
+    Reader::Pointer readerSeg;
 };
 
-#endif
+#endif // MAIN_H
