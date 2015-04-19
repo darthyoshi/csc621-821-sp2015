@@ -13,7 +13,7 @@ file(GLOB QT_WRAP ${visualize_SOURCE_DIR}/include/*.h)
 file(GLOB CPP_FILES *.cpp)
 
 qt5_wrap_ui(UI_SRCS ${UI_FILES})
-add_executable(visualize MACOSX_BUNDLE ${CPP_FILES} ${UI_SRCS} ${QT_WRAP})
-qt5_use_modules(visualize Core Gui Widgets)
-target_link_libraries(visualize ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+add_executable(windgrp MACOSX_BUNDLE ${CPP_FILES} ${UI_SRCS} ${QT_WRAP})
+qt5_use_modules(windgrp Core Gui Widgets)
+target_link_libraries(windgrp ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 

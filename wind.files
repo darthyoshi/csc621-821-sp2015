@@ -1,0 +1,8 @@
+include/DICOMSeries.h
+include/easylogging++.h
+include/Register.h
+include/Segment.h
+source/DICOMSeries.cpp
+source/Register.cpp
+source/Segment.cpp
+source/Visualize.cpp
