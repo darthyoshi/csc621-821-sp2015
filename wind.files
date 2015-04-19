@@ -6,3 +6,5 @@ source/DICOMSeries.cpp
 source/Register.cpp
 source/Segment.cpp
 source/Visualize.cpp
+source/Register.ui
+source/Segmentor.cpp
