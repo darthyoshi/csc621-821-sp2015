@@ -5,8 +5,8 @@ INITIALIZE_EASYLOGGINGPP
 
 #include <QApplication>
 
-#include "Register.h"
-#include "Segment.h"
+#include "RegWindow.h"
+#include "SegWindow.h"
 
 int main(int argc, char* argv[]) {
   // Configure the logger.
@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
   app.setOrganizationName("Group Wind");
   app.setApplicationName("Visualization Example");
 
-  Register registerWindow;
+  RegWindow registerWindow;
   registerWindow.showMaximized();
   registerWindow.show();
 
