@@ -13,22 +13,24 @@
 #include <vtkRenderer.h>
 
 #include "easylogging++.h"
-#include "Segment.h"
-#include "ui_Segment.h"
+#include "Window.h"
+#include "ui_Window.h"
 
-Segment::Segment(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow()) {
+Window::Window(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow()) {
   m_ui->setupUi(this);
   m_view = vtkImageViewer2::New();
 
-  connect(m_ui->actionLoadDICOM, SIGNAL(triggered()), this, SLOT(LoadDICOM()));
+  connect(m_ui->actionLoadFixed, SIGNAL(triggered()), this, SLOT(LoadDICOM()));
+  connect(m_ui->actionLoadMoving, SIGNAL(triggered()), this, SLOT(LoadDICOM()));
+  connect(m_ui->actionRun_Segmentation, SIGNAL(triggered()), this, SLOT(testSeg()));
   connect(m_ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
-Segment::~Segment() {
+Window::~Window() {
   delete m_ui;
 }
 
-int Segment::LoadDICOM() {
+int Window::LoadDICOM() {
   typedef unsigned short InputPixel;
   typedef itk::Image<InputPixel, 3> InputImage;
 

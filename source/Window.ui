@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>556</width>
+    <width>800</width>
     <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Registration</string>
+   <string>Visualize</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -20,44 +20,17 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QWidget" name="widget" native="true"/>
+    </item>
+    <item>
      <widget class="QVTKWidget" name="QVTKMain" native="true">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QVTKWidget" name="QVTKMain2" native="true">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="2">
-     <widget class="QSlider" name="verticalSlider">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>Segment</string>
       </property>
      </widget>
     </item>
@@ -68,8 +41,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>556</width>
-     <height>21</height>
+     <width>800</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -77,10 +50,10 @@
      <string>File</string>
     </property>
     <addaction name="separator"/>
-    <addaction name="actionOpen_First_Dicom"/>
-    <addaction name="actionOpen_Second_Dicom"/>
-    <addaction name="separator"/>
     <addaction name="actionExit"/>
+    <addaction name="actionLoadFixed"/>
+    <addaction name="actionLoadMoving"/>
+    <addaction name="actionRun_Segmentation"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -90,14 +63,19 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionOpen_First_Dicom">
+  <action name="actionLoadFixed">
    <property name="text">
-    <string>Open First DICOM..</string>
+    <string>Load Fixed Images...</string>
    </property>
   </action>
-  <action name="actionOpen_Second_Dicom">
+  <action name="actionRun_Segmentation">
    <property name="text">
-    <string>Open Second DICOM</string>
+    <string>Run Segmentation</string>
+   </property>
+  </action>
+  <action name="actionLoadMoving">
+   <property name="text">
+    <string>Load Moving Images...</string>
    </property>
   </action>
  </widget>

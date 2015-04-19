@@ -1,42 +1,27 @@
-#include <QFileDialog>
-#include <QFileInfoList>
-#include <QDir>
-#include <iostream>
+#include "RegWindow.h"
 
-#include <itkImage.h>
-#include <itkImageSeriesReader.h>
-#include <itkImageToVTKImageFilter.h>
-
-#include <vtkImageViewer2.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
-
-#include "easylogging++.h"
-#include "Register.h"
-#include "ui_Register.h"
-
-Register::Register(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow()) {
+RegWindow::RegWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::RegMainWindow()) {
   m_ui->setupUi(this);
   m_viewLeft = vtkImageViewer2::New();
   m_viewRight = vtkImageViewer2::New();
+  readerFixed = Reader::New();
+  readerMoving = Reader::New();
 
-  connect(m_ui->actionOpen_First_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOM()));
-  connect(m_ui->actionOpen_Second_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOM2()));
-
+  //connect(m_ui->actionOpen_First_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOMFixed()));
+  //connect(m_ui->actionOpen_Second_Dicom, SIGNAL(triggered()), this, SLOT(LoadDICOMMoving()));
   connect(m_ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
-Register::~Register() {
+RegWindow::~RegWindow() {
   delete m_ui;
 }
 
-int Register::LoadDICOM() {
-  typedef unsigned short InputPixel;
-  typedef itk::Image<InputPixel, 3> InputImage;
+int RegWindow::LoadDICOMFixed() {
+  //typedef unsigned short InputPixel;
+  //typedef itk::Image<InputPixel, 3> InputImage;
 
-  typedef itk::ImageSeriesReader<InputImage> Reader;
-  Reader::Pointer reader = Reader::New();
+  //typedef itk::ImageSeriesReader<InputImage> Reader;
+  //Reader::Pointer reader = Reader::New();
 
   QDir dir = QFileDialog::getExistingDirectory(0, "Select Folder: ");
   QFileInfoList list = dir.entryInfoList(QDir::Dirs | QDir::Files | 
@@ -49,10 +34,10 @@ int Register::LoadDICOM() {
 
     names.push_back(str + finfo.fileName().toStdString().c_str());
   }
-  reader->SetFileNames(names);
+  readerFixed->SetFileNames(names);
 
   try {
-    reader->Update();
+    readerFixed->Update();
   } catch (itk::ExceptionObject& e) {
     CLOG(INFO, "window") << "Failed to load DICOM file: ";
     return EXIT_FAILURE;
@@ -60,7 +45,7 @@ int Register::LoadDICOM() {
 
   typedef itk::ImageToVTKImageFilter<InputImage> Connector;
   Connector::Pointer connector = Connector::New();
-  connector->SetInput(reader->GetOutput());
+  connector->SetInput(readerFixed->GetOutput());
 
   try {
     connector->Update();
@@ -72,24 +57,24 @@ int Register::LoadDICOM() {
   vtkImageData* image = vtkImageData::New();
   image->DeepCopy(connector->GetOutput());
 
-  m_ui->QVTKMain->SetRenderWindow(m_viewLeft->GetRenderWindow());
-  m_viewLeft->SetupInteractor(m_ui->QVTKMain->GetRenderWindow()->GetInteractor());
+  m_ui->QVTKMainFixed->SetRenderWindow(m_viewLeft->GetRenderWindow());
+  m_viewLeft->SetupInteractor(m_ui->QVTKMainFixed->GetRenderWindow()->GetInteractor());
 
   m_viewLeft->SetInputData(image);
   m_viewLeft->SetSlice(m_viewLeft->GetSliceMax() / 2);
   m_viewLeft->GetRenderer()->ResetCamera();
   m_viewLeft->Render();
 
-  m_ui->QVTKMain->update();
+  m_ui->QVTKMainFixed->update();
   return EXIT_SUCCESS;
 }
 
-int Register::LoadDICOM2() {
+int RegWindow::LoadDICOMMoving() {
   typedef unsigned short InputPixel;
   typedef itk::Image<InputPixel, 3> InputImage;
 
-  typedef itk::ImageSeriesReader<InputImage> Reader;
-  Reader::Pointer reader = Reader::New();
+  //typedef itk::ImageSeriesReader<InputImage> Reader;
+  //Reader::Pointer reader = Reader::New();
 
   QDir dir = QFileDialog::getExistingDirectory(0, "Select Folder: ");
   QFileInfoList list = dir.entryInfoList(QDir::Dirs | QDir::Files | 
@@ -102,10 +87,10 @@ int Register::LoadDICOM2() {
 
     names.push_back(str + finfo.fileName().toStdString().c_str());
   }
-  reader->SetFileNames(names);
+  readerMoving->SetFileNames(names);
 
   try {
-    reader->Update();
+    readerMoving->Update();
   } catch (itk::ExceptionObject& e) {
     CLOG(INFO, "window") << "Failed to load DICOM file: ";
     return EXIT_FAILURE;
@@ -113,7 +98,7 @@ int Register::LoadDICOM2() {
 
   typedef itk::ImageToVTKImageFilter<InputImage> Connector;
   Connector::Pointer connector = Connector::New();
-  connector->SetInput(reader->GetOutput());
+  connector->SetInput(readerMoving->GetOutput());
 
   try {
     connector->Update();
@@ -125,15 +110,24 @@ int Register::LoadDICOM2() {
   vtkImageData* image = vtkImageData::New();
   image->DeepCopy(connector->GetOutput());
 
-  m_ui->QVTKMain2->SetRenderWindow(m_viewRight->GetRenderWindow());
-  m_viewRight->SetupInteractor(m_ui->QVTKMain2->GetRenderWindow()->GetInteractor());
+  m_ui->QVTKMainMoving->SetRenderWindow(m_viewRight->GetRenderWindow());
+  m_viewRight->SetupInteractor(m_ui->QVTKMainMoving->GetRenderWindow()->GetInteractor());
 
   m_viewRight->SetInputData(image);
   m_viewRight->SetSlice(m_viewRight->GetSliceMax() / 2);
   m_viewRight->GetRenderer()->ResetCamera();
   m_viewRight->Render();
 
-  m_ui->QVTKMain2->update();
+  m_ui->QVTKMainMoving->update();
   return EXIT_SUCCESS;
 }
 
+void RegWindow::on_pushButton_OpenFixed_clicked()
+{
+    LoadDICOMFixed();
+}
+
+void RegWindow::on_pushButton_OpenMoving_clicked()
+{
+    LoadDICOMMoving();
+}
