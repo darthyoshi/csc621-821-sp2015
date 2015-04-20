@@ -61,20 +61,28 @@ private slots:
 
     void on_pushButton_Segment_clicked();
 
+    void on_pushButton_SelectCineDir_clicked();
+
+    void on_pushButton_SelectMIPDir_clicked();
+
 private:
     Ui::MainWindow *ui;
 
-    int LoadDICOMFixed();
-    int LoadDICOMMoving();
-    int LoadDICOMSeg();
+    int LoadDICOM (
+            Reader::Pointer reader,
+            vtkImageViewer2 *m_view,
+            QVTKWidget *qVTKWidget);
 
     vtkImageViewer2* m_viewLeft;
     vtkImageViewer2* m_viewRight;
     vtkImageViewer2* m_viewSeg;
+    vtkImageViewer2* m_viewCine;
+    vtkImageViewer2* m_viewMIP;
 
     Reader::Pointer readerFixed;
     Reader::Pointer readerMoving;
     Reader::Pointer readerSeg;
+    Reader::Pointer readerCine;
 };
 
 #endif // MAIN_H
