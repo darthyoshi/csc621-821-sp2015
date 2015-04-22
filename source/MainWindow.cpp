@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->InitializeRenderWindow(m_viewLeft, ui->QVTKRegFixed);
     
     m_viewRight = vtkImageViewer2::New();
-    this->InitializeRenderWindow(m_viewRight, ui->QVTKRegMoving);
+    //this->InitializeRenderWindow(m_viewRight, ui->QVTKRegMoving);
 
     m_viewSeg = vtkImageViewer2::New();
     //this->InitializeRenderWindow(m_viewSeg, ui->QVTKSeg);
