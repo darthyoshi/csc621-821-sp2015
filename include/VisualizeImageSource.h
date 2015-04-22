@@ -22,11 +22,11 @@ namespace vis {
    * overlays on top of a base image, but maintains the 3D structure
    * of the data so that it can be forwarded to vtkResliceImageViewer.
    */
-  class VisualizeImageSource : public itk::ImageSource<MergedImage> {
+  class VisualizeImageSource : public itk::ImageSource<BaseImage> {
 
     public:
       typedef VisualizeImageSource Self;
-      typedef itk::ImageSource<MergedImage> Superclass;
+      typedef itk::ImageSource<BaseImage> Superclass;
       typedef itk::SmartPointer<Self> Pointer;
 
     public:

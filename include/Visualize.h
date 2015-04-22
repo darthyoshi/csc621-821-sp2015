@@ -26,6 +26,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkResliceImageViewerMeasurements.h>
 #include <vtkPlaneSource.h>
+#include <vtkScalarsToColors.h>
 #include <vtkImageMapToColors.h>
 #include <vtkDistanceWidget.h>
 #include <vtkProperty.h>
@@ -59,8 +60,6 @@ namespace vis {
         AXIAL_VIEW,
         SAGITTAL_VIEW,
       };
-      typedef itk::Size<3> Size;
-      typedef itk::Image<unsigned short, 3> GreyImage;
 
     public: 
       Visualize(QWidget* parent = 0);

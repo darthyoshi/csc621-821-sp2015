@@ -19,6 +19,8 @@
 
 #include "easylogging++.h"
 
+#include "Common.h"
+
 namespace vis {
 
   class Loader : public QWidget {
@@ -26,15 +28,14 @@ namespace vis {
     Q_OBJECT
 
     public:
-      typedef itk::Image<itk::RGBPixel<unsigned char>, 3> Image;
-      typedef itk::ImageSeriesReader<Image> Reader;
-      typedef itk::ImageToVTKImageFilter<Image> Converter;
+      typedef itk::ImageSeriesReader<BaseImage> Reader;
+      typedef itk::ImageToVTKImageFilter<BaseImage> Converter;
 
     public:
       Loader(QWidget* parent = 0);
 
     signals:
-      void SourceChanged(Reader::Pointer source);
+      void SourceChanged(BaseImage::Pointer source);
 
     public slots:
       void LoadDICOMSource();

@@ -2,8 +2,10 @@
 #include "itkRGBPixel.h"
 
 namespace vis {
-  typedef unsigned int BasePixel;
+  /**
+   * We use `signed short` as our base pixel type because it is the usual
+   * type assigned to CT and X-ray image sources.
+   */
+  typedef itk::RGBPixel<signed short> BasePixel;
   typedef itk::Image<BasePixel, 3> BaseImage;
-  typedef itk::RGBPixel<unsigned int> LevelSetPixel;
-  typedef itk::Image<LevelSetPixel> LevelSetImage;
 }

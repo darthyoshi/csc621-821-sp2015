@@ -89,9 +89,10 @@ Visualize::Visualize(QWidget* parent = 0) : QMainWindow(parent),
 
   // Initialize image data.
   m_imageData = VisualizeImageSource::New();
-  m_converter = itk::ImageToVTKImageFilter<VisualizeImageSource::OutputImageType>::New();
 
-  // Initialize sagittal view.
+  typedef VisualizeImageSource::OutputImageType OutType;
+  m_converter = itk::ImageToVTKImageFilter<OutType>::New();
+
   for (int i = 0; i < 3; i++) {
     m_viewers[i] = vtkSmartPointer<vtkResliceImageViewer>::New();
   }
@@ -203,14 +204,18 @@ Visualize::Visualize(QWidget* parent = 0) : QMainWindow(parent),
     m_planeWidgets[i]->SetColorMap(
       m_viewers[i]->GetResliceCursorWidget()->GetResliceCursorRepresentation()->GetColorMap());
   }
+  m_viewers[0]->SetAlphaRange(0.0, 1.0);
+  m_viewers[0]->Build();
+
+  m_viewers[0]->GetLookupTable()->PrintSelf(std::cout, vtkIndent(1));
 
   this->m_window->sagittalView->show();
   this->m_window->coronalView->show();
   this->m_window->axialView->show();
 
   typedef Loader::Reader Reader;
-  connect(m_loader, &Loader::SourceChanged, [=](Reader::Pointer p) {
-    m_converter->SetInput(p->GetOutput());
+  connect(m_loader, &Loader::SourceChanged, [=](BaseImage::Pointer p) {
+    m_converter->SetInput(p);
     Update();
   });
   connect(m_window->actionExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -269,6 +274,7 @@ void Visualize::Update() {
     m_viewers[i]->SetInputData(m_converter->GetOutput());
     m_viewers[i]->GetRenderer()->ResetCamera();
     m_planeWidgets[i]->SetInputData(m_converter->GetOutput());
+    m_planeWidgets[i]->GetColorMap()->Update();
   }
   ResetViews();
 }

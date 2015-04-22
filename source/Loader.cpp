@@ -4,6 +4,7 @@
 using namespace vis;
 
 Loader::Loader(QWidget* parent = 0) : QWidget(parent) {
+
   /**
    * Setup Interface
    */
@@ -73,6 +74,5 @@ void Loader::LoadDICOMSource() {
     m_UIDLabel->width()));
 
   m_source = reader;
-
-  emit SourceChanged(m_source);
+  emit SourceChanged(m_source->GetOutput());
 }
