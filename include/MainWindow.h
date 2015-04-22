@@ -16,12 +16,14 @@
 #include "itkImage.h"
 #include <itkImageSeriesReader.h>
 #include <itkImageSeriesWriter.h>
-#include <itkImageFileReader.h>
-#include <itkImageFileWriter.h>
 #include <itkImageToVTKImageFilter.h>
+#include "itkGDCMImageIO.h"
+#include "itkGDCMSeriesFileNames.h"
+#include <vector>
+#include "itksys/SystemTools.hxx"
 
-#include "itkSubtractImageFilter.h"
-#include "itkThresholdImageFilter.h"
+//#include "itkSubtractImageFilter.h"
+//#include "itkThresholdImageFilter.h"
 
 #include "easylogging++.h"
 #include "ui_MainWindow.h"
@@ -34,12 +36,17 @@ class vtkImageViewer2;
 class vtkResliceImageViewer;
 
 typedef unsigned char InputPixel;
-const int DIMS = 3;
-typedef itk::Image<InputPixel, DIMS> InputImage;
-const typedef itk::Image<InputPixel, DIMS> OutputImage;
+const int DIMSIN = 3;
+typedef itk::Image<InputPixel, DIMSIN> InputImage;
+const int DIMSOUT = 2;
+typedef itk::Image<InputPixel, DIMSOUT> OutputImage;
+
 typedef itk::ImageSeriesReader<InputImage> Reader;
-//typedef itk::ImageSeriesWriter<InputImage> Writer;
+typedef itk::ImageSeriesWriter<InputImage, OutputImage> Writer;
 typedef itk::ImageToVTKImageFilter<InputImage> Connector;
+
+typedef itk::GDCMImageIO ImageIOType;
+typedef itk::GDCMSeriesFileNames NamesGeneratorType;
 
 namespace Ui {
 class MainWindow;

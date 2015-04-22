@@ -172,10 +172,6 @@ int MainWindow::convertITKToVTK (
 
 void MainWindow::on_pushButton_Segment_clicked()
 {
-    //typedef   unsigned char   InternalPixelType;
-    //const     unsigned int    Dimension = 3;
-    //typedef itk::Image< InternalPixelType, Dimension >  myImageType;
-
     //Segment seg = Segment ();
     //seg.testSeg();
 
@@ -183,15 +179,48 @@ void MainWindow::on_pushButton_Segment_clicked()
     Segmentor< InputImage > segmentor = Segmentor< InputImage >();
     segmentor.SetInputs( readerSeg1->GetOutput(), readerSeg2->GetOutput() );
     segmentor.SetThreshold(1, 2555);
+
+    //convert data into presentation format
     convertITKToVTK (segmentor.GetOutput(), m_viewCine, ui->QVTKCineViewer);
 
-    //m_viewCine->SetupInteractor(ui->QVTKCineViewer->GetRenderWindow()->GetInteractor());
-    //m_viewCine->SetInputData(segmentor.GetOutput());
-    //m_viewCine->SetSlice(m_viewCine->GetSliceMax() / 2);
-    //m_viewCine->GetRenderer()->ResetCamera();
-    //m_viewCine->Render();
-
+    //switch to Cine view tab
     setTab(tabIdxCine);
+
+    //test writing to file
+    Writer::Pointer writer = Writer::New();
+    //reader->SetImageIO( gdcmIO );
+    writer->SetInput( segmentor.GetOutput() );
+    //writer->SetImageIO( gdcmIO );
+
+    const char * outputDirectory = "~/test/";
+    itksys::SystemTools::MakeDirectory( outputDirectory );
+    NamesGeneratorType::Pointer namesGenerator = NamesGeneratorType::New();
+    namesGenerator->SetInputDirectory( outputDirectory );
+    const Reader::FileNamesContainer & filenames =
+            namesGenerator->GetInputFileNames();
+    //const unsigned int numberOfFileNames =  filenames.size();
+    //std::cout << numberOfFileNames << std::endl;
+    //for(unsigned int fni = 0; fni < numberOfFileNames; ++fni) {
+    //    std::cout << "filename # " << fni << " = ";
+    //    std::cout << filenames[fni] << std::endl;
+    //}
+
+    //not sure about "readerSeg1" being valid
+    writer->SetMetaDataDictionaryArray(
+                            readerSeg1->GetMetaDataDictionaryArray() );
+    try
+      {
+      writer->Update();
+      }
+    catch( itk::ExceptionObject & excp )
+      {
+      std::cerr << "Exception thrown while writing the series " << std::endl;
+      std::cerr << excp << std::endl;
+      //return EXIT_FAILURE;
+    }
+
+    //return EXIT_SUCCESS;
+
 }
 
 void MainWindow::on_pushButton_SelectCineDir_clicked()
