@@ -10,7 +10,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     LoadDICOM(readerFixed, m_viewLeft, ui->QVTKRegFixed);
     ui->QVTKRegFixed->SetRenderWindow(m_viewLeft->GetRenderWindow());
-   
+    m_viewLeft->SetupInteractor(ui->QVTKRegFixed->GetRenderWindow()->GetInteractor());
+    m_viewLeft->GetRenderer()->ResetCamera();
+    m_viewLeft->Render();
 /*
     qVTKWidget->SetRenderWindow(m_view->GetRenderWindow());
   m_view->SetupInteractor(qVTKWidget->GetRenderWindow()->GetInteractor());
