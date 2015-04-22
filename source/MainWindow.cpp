@@ -30,7 +30,6 @@ MainWindow::~MainWindow()
 void MainWindow::InitializeRenderWindow(vtkImageViewer2 *m_view,
         QVTKWidget *qVTKWidget)
 {
-  m_view->setParent( this );
   qVTKWidget->SetRenderWindow(m_view->GetRenderWindow());
   m_view->SetupInteractor(qVTKWidget->GetRenderWindow()->GetInteractor());
   m_view->GetRenderer()->ResetCamera();
