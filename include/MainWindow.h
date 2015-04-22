@@ -65,6 +65,8 @@ private slots:
 
     void on_pushButton_SelectMIPDir_clicked();
 
+    void InitializeRenderWindow(vtkImageViewer2*, QVTKWidget*);
+
 private:
     Ui::MainWindow *ui;
 
