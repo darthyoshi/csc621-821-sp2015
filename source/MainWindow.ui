@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>653</height>
+    <width>1430</width>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,8 +27,8 @@
        <widget class="QPushButton" name="pushButton_Register">
         <property name="geometry">
          <rect>
-          <x>570</x>
-          <y>520</y>
+          <x>1080</x>
+          <y>440</y>
           <width>311</width>
           <height>32</height>
          </rect>
@@ -40,10 +40,10 @@
        <widget class="QSlider" name="verticalSlider">
         <property name="geometry">
          <rect>
-          <x>860</x>
-          <y>40</y>
+          <x>1370</x>
+          <y>30</y>
           <width>22</width>
-          <height>311</height>
+          <height>391</height>
          </rect>
         </property>
         <property name="orientation">
@@ -54,35 +54,9 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>0</y>
-          <width>841</width>
-          <height>32</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_1">
-         <item>
-          <widget class="QPushButton" name="pushButton_SelectFixedDir">
-           <property name="text">
-            <string>Select Fixed DICOM Image Directory...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_SelectMovingDir">
-           <property name="text">
-            <string>Select Moving DICOM Image Directory...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
           <y>30</y>
-          <width>841</width>
-          <height>411</height>
+          <width>1351</width>
+          <height>391</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -97,10 +71,13 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item>
-          <widget class="QVTKWidget" name="QVTKRegMoving" native="true">
+          <widget class="QVTKWidget" name="QVTKRegMoving1" native="true">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -110,41 +87,81 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QVTKWidget" name="QVTKRegMoving2" native="true">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
         </layout>
+       </widget>
+       <widget class="QSplitter" name="splitter_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>0</y>
+          <width>1351</width>
+          <height>32</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <widget class="QWidget" name="layoutWidget">
+         <layout class="QHBoxLayout" name="horizontalLayout_1">
+          <item>
+           <widget class="QPushButton" name="pushButton_SelectRegFixedDir">
+            <property name="text">
+             <string>Select Directory (Fixed) for Registration...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_SelectRegMoving1Dir">
+            <property name="text">
+             <string>Select Directory Time #1 (Moving) for Registration...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QPushButton" name="pushButton_SelectRegMoving2Dir">
+         <property name="text">
+          <string>Select Directory Time #2 (Moving) for Registration...</string>
+         </property>
+        </widget>
        </widget>
        <zorder>layoutWidget</zorder>
        <zorder>layoutWidget</zorder>
        <zorder>verticalSlider</zorder>
        <zorder>pushButton_Register</zorder>
+       <zorder>pushButton_SelectRegMoving2Dir</zorder>
       </widget>
       <widget class="QWidget" name="SegWindowTab">
        <attribute name="title">
         <string>Segmentation</string>
        </attribute>
-       <widget class="QVTKWidget" name="QVTKSeg" native="true">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>30</y>
-          <width>761</width>
-          <height>371</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pushButton_Segment">
         <property name="geometry">
          <rect>
-          <x>530</x>
-          <y>420</y>
-          <width>261</width>
+          <x>1080</x>
+          <y>440</y>
+          <width>301</width>
           <height>32</height>
          </rect>
         </property>
@@ -152,18 +169,79 @@
          <string>Perform Segmentation...</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton_SelectSegDir">
+       <widget class="QSlider" name="verticalSlider_2">
         <property name="geometry">
          <rect>
-          <x>30</x>
+          <x>880</x>
+          <y>30</y>
+          <width>22</width>
+          <height>401</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
           <y>0</y>
-          <width>331</width>
+          <width>851</width>
           <height>32</height>
          </rect>
         </property>
-        <property name="text">
-         <string>Select DICOM Directory for Segmentation...</string>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="pushButton_SelectSeg1Dir">
+           <property name="text">
+            <string>Select DICOM Directory #1 for Segmentation...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_SelectSeg2Dir">
+           <property name="text">
+            <string>Select DICOM Directory #2 for Segmentation...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QSplitter" name="splitter">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>851</width>
+          <height>391</height>
+         </rect>
         </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <widget class="QVTKWidget" name="QVTKSeg1" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="autoFillBackground">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QVTKWidget" name="QVTKSeg2" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="autoFillBackground">
+          <bool>true</bool>
+         </property>
+        </widget>
        </widget>
       </widget>
       <widget class="QWidget" name="CineViewerTab">
@@ -180,7 +258,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>Select Cine View DICOM Directory...</string>
+         <string>Select DICOM Directory for Cine View ...</string>
         </property>
        </widget>
        <widget class="QVTKWidget" name="QVTKCineViewer" native="true">
@@ -200,6 +278,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="autoFillBackground">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>
@@ -238,6 +319,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
        </widget>
       </widget>
      </widget>
@@ -249,7 +333,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>920</width>
+     <width>1430</width>
      <height>22</height>
     </rect>
    </property>

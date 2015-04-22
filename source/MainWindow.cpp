@@ -1,28 +1,39 @@
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
+#include "mainWindow.h"
+#include "ui_mainWindow.h"
+#include "Segmentor.cpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    m_viewLeft = vtkImageViewer2::New();
 
-    this->InitializeRenderWindow(m_viewLeft, ui->QVTKRegFixed);
-    
-    m_viewRight = vtkImageViewer2::New();
-    //this->InitializeRenderWindow(m_viewRight, ui->QVTKRegMoving);
+    m_viewRegFixed = vtkImageViewer2::New();
+    this->InitializeRenderWindow(m_viewRegFixed, ui->QVTKRegFixed);
 
-    m_viewSeg = vtkImageViewer2::New();
-    //this->InitializeRenderWindow(m_viewSeg, ui->QVTKSeg);
+    m_viewRegMoving1 = vtkImageViewer2::New();
+    this->InitializeRenderWindow(m_viewRegMoving1, ui->QVTKRegMoving1);
+
+    m_viewRegMoving2 = vtkImageViewer2::New();
+    this->InitializeRenderWindow(m_viewRegMoving2, ui->QVTKRegMoving2);
+
+    m_viewSeg1 = vtkImageViewer2::New();
+    this->InitializeRenderWindow(m_viewSeg1, ui->QVTKSeg1);
+
+    m_viewSeg2 = vtkImageViewer2::New();
+    this->InitializeRenderWindow(m_viewSeg2, ui->QVTKSeg2);
 
     m_viewCine = vtkImageViewer2::New();
-    //this->InitializeRenderWindow(m_viewCine, ui->QVTKCineViewer);
+    this->InitializeRenderWindow(m_viewCine, ui->QVTKCineViewer);
 
-    readerFixed = Reader::New();
-    readerMoving = Reader::New();
-    readerSeg = Reader::New();
+    readerRegFixed = Reader::New();
+    readerRegMoving1 = Reader::New();
+    readerRegMoving2 = Reader::New();
+    readerSeg1 = Reader::New();
+    readerSeg2 = Reader::New();
     readerCine = Reader::New();
+
+    setTab (tabIdxReg);
 
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 }
@@ -42,10 +53,16 @@ void MainWindow::InitializeRenderWindow(vtkImageViewer2 *m_view,
   m_view->Render();
 }
 
+void MainWindow::setTab (int tab) {
+    ui->tabWidget->setCurrentIndex(tab);
+    ui->tabWidget->currentWidget()->raise();
+}
+
 int MainWindow::LoadDICOM(
         Reader::Pointer reader,
         vtkImageViewer2 *m_view,
-        QVTKWidget *qVTKWidget) {
+        QVTKWidget *qVTKWidget
+        ) {
   QDir dir = QFileDialog::getExistingDirectory(0, "Select Folder: ");
   QFileInfoList list = dir.entryInfoList(QDir::Dirs | QDir::Files |
       QDir::NoDotAndDotDot);
@@ -66,7 +83,6 @@ int MainWindow::LoadDICOM(
     return EXIT_FAILURE;
   }
 
-  typedef itk::ImageToVTKImageFilter<InputImage> Connector;
   Connector::Pointer connector = Connector::New();
   connector->SetInput(reader->GetOutput());
 
@@ -93,32 +109,90 @@ int MainWindow::LoadDICOM(
 }
 
 
-void MainWindow::on_pushButton_SelectFixedDir_clicked()
+void MainWindow::on_pushButton_SelectRegFixedDir_clicked()
 {
-    LoadDICOM(readerFixed, m_viewLeft, ui->QVTKRegFixed);
+    LoadDICOM(readerRegFixed, m_viewRegFixed, ui->QVTKRegFixed);
 }
 
-void MainWindow::on_pushButton_SelectMovingDir_clicked()
+void MainWindow::on_pushButton_SelectRegMoving1Dir_clicked()
 {
-    LoadDICOM(readerMoving, m_viewRight, ui->QVTKRegMoving);
+    LoadDICOM(readerRegMoving1, m_viewRegMoving1, ui->QVTKRegMoving1);
+}
+
+void MainWindow::on_pushButton_SelectRegMoving2Dir_clicked()
+{
+    LoadDICOM(readerRegMoving2, m_viewRegMoving2, ui->QVTKRegMoving2);
 }
 
 void MainWindow::on_pushButton_Register_clicked()
 {
+    //registration logic
+    setTab (tabIdxSeg);
+}
 
+void MainWindow::on_pushButton_SelectSeg1Dir_clicked()
+{
+    LoadDICOM(readerSeg1, m_viewSeg1, ui->QVTKSeg1);
+}
+
+void MainWindow::on_pushButton_SelectSeg2Dir_clicked()
+{
+    LoadDICOM(readerSeg2, m_viewSeg2, ui->QVTKSeg2);
+}
+
+int MainWindow::convertITKToVTK (
+        const itk::Image<unsigned char, 3> * imageITK,
+        //OutputImage imageITK,
+        vtkImageViewer2 *m_view,
+        QVTKWidget *qVTKWidget
+        ) {
+    Connector::Pointer connector = Connector::New();
+    connector->SetInput(imageITK);
+
+    try {
+      connector->Update();
+    } catch (itk::ExceptionObject& e) {
+      CLOG(INFO, "window") << "Failed to convert image data: ";
+      return EXIT_FAILURE;
+    }
+
+    vtkImageData* imageVTK = vtkImageData::New();
+    imageVTK->DeepCopy(connector->GetOutput());
+
+    qVTKWidget->SetRenderWindow(m_view->GetRenderWindow());
+    m_view->SetupInteractor(qVTKWidget->GetRenderWindow()->GetInteractor());
+
+    m_view->SetInputData(imageVTK);
+    m_view->SetSlice(m_view->GetSliceMax() / 2);
+    m_view->GetRenderer()->ResetCamera();
+    m_view->Render();
+
+    return EXIT_SUCCESS;
 }
 
 void MainWindow::on_pushButton_Segment_clicked()
 {
-    Segment seg = Segment ();
-    seg.testSeg();
-}
+    //typedef   unsigned char   InternalPixelType;
+    //const     unsigned int    Dimension = 3;
+    //typedef itk::Image< InternalPixelType, Dimension >  myImageType;
 
-void MainWindow::on_pushButton_SelectSegDir_clicked()
-{
-    LoadDICOM(readerSeg, m_viewSeg, ui->QVTKSeg);
-}
+    //Segment seg = Segment ();
+    //seg.testSeg();
 
+    //This part of code deals deals with the wrapper for the filter
+    Segmentor< InputImage > segmentor = Segmentor< InputImage >();
+    segmentor.SetInputs( readerSeg1->GetOutput(), readerSeg2->GetOutput() );
+    segmentor.SetThreshold(1, 2555);
+    convertITKToVTK (segmentor.GetOutput(), m_viewCine, ui->QVTKCineViewer);
+
+    //m_viewCine->SetupInteractor(ui->QVTKCineViewer->GetRenderWindow()->GetInteractor());
+    //m_viewCine->SetInputData(segmentor.GetOutput());
+    //m_viewCine->SetSlice(m_viewCine->GetSliceMax() / 2);
+    //m_viewCine->GetRenderer()->ResetCamera();
+    //m_viewCine->Render();
+
+    setTab(tabIdxCine);
+}
 
 void MainWindow::on_pushButton_SelectCineDir_clicked()
 {
@@ -130,3 +204,4 @@ void MainWindow::on_pushButton_SelectMIPDir_clicked()
 {
 
 }
+

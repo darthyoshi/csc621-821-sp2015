@@ -20,10 +20,11 @@
 #include <itkImageFileWriter.h>
 #include <itkImageToVTKImageFilter.h>
 
+#include "itkSubtractImageFilter.h"
+#include "itkThresholdImageFilter.h"
+
 #include "easylogging++.h"
 #include "ui_MainWindow.h"
-
-#include "Segment.h"
 
 class QAction;
 class QMenu;
@@ -32,11 +33,13 @@ class QPlainTextEdit;
 class vtkImageViewer2;
 class vtkResliceImageViewer;
 
-typedef unsigned short InputPixel;
+typedef unsigned char InputPixel;
 const int DIMS = 3;
 typedef itk::Image<InputPixel, DIMS> InputImage;
+const typedef itk::Image<InputPixel, DIMS> OutputImage;
 typedef itk::ImageSeriesReader<InputImage> Reader;
-
+//typedef itk::ImageSeriesWriter<InputImage> Writer;
+typedef itk::ImageToVTKImageFilter<InputImage> Connector;
 
 namespace Ui {
 class MainWindow;
@@ -51,13 +54,17 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_SelectFixedDir_clicked();
+    void on_pushButton_SelectRegFixedDir_clicked();
 
-    void on_pushButton_SelectMovingDir_clicked();
+    void on_pushButton_SelectRegMoving1Dir_clicked();
+
+    void on_pushButton_SelectRegMoving2Dir_clicked();
 
     void on_pushButton_Register_clicked();
 
-    void on_pushButton_SelectSegDir_clicked();
+    void on_pushButton_SelectSeg1Dir_clicked();
+
+    void on_pushButton_SelectSeg2Dir_clicked();
 
     void on_pushButton_Segment_clicked();
 
@@ -65,25 +72,40 @@ private slots:
 
     void on_pushButton_SelectMIPDir_clicked();
 
-    void InitializeRenderWindow(vtkImageViewer2*, QVTKWidget*);
-
 private:
     Ui::MainWindow *ui;
 
+    const int tabIdxReg = 0;
+    const int tabIdxSeg = 1;
+    const int tabIdxCine = 2;
+    const int tabIdxMIP = 3;
+
+    void InitializeRenderWindow(vtkImageViewer2*, QVTKWidget*);
+    void setTab (int tab);
     int LoadDICOM (
             Reader::Pointer reader,
             vtkImageViewer2 *m_view,
-            QVTKWidget *qVTKWidget);
+            QVTKWidget *qVTKWidget
+            );
+    int convertITKToVTK (
+            const itk::Image<unsigned char, 3> * imageITK,
+            vtkImageViewer2 *m_view,
+            QVTKWidget *qVTKWidget
+            );
 
-    vtkImageViewer2* m_viewLeft;
-    vtkImageViewer2* m_viewRight;
-    vtkImageViewer2* m_viewSeg;
+    vtkImageViewer2* m_viewRegFixed;
+    vtkImageViewer2* m_viewRegMoving1;
+    vtkImageViewer2* m_viewRegMoving2;
+    vtkImageViewer2* m_viewSeg1;
+    vtkImageViewer2* m_viewSeg2;
     vtkImageViewer2* m_viewCine;
     vtkImageViewer2* m_viewMIP;
 
-    Reader::Pointer readerFixed;
-    Reader::Pointer readerMoving;
-    Reader::Pointer readerSeg;
+    Reader::Pointer readerRegFixed;
+    Reader::Pointer readerRegMoving1;
+    Reader::Pointer readerRegMoving2;
+    Reader::Pointer readerSeg1;
+    Reader::Pointer readerSeg2;
     Reader::Pointer readerCine;
 };
 
