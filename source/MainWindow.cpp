@@ -7,6 +7,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_viewLeft = vtkImageViewer2::New();
+    ui->QVTKRegMoving->SetRenderWindow(m_viewLeft->GetRenderWindow());
+    m_viewLeft->SetupInteractor(ui->QVTKRegMoving->GetRenderWindow()->GetInteractor());
+
     m_viewRight = vtkImageViewer2::New();
     m_viewSeg = vtkImageViewer2::New();
     m_viewCine = vtkImageViewer2::New();
