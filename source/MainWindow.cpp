@@ -7,8 +7,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_viewLeft = vtkImageViewer2::New();
-
-    LoadDICOM(readerFixed, m_viewLeft, ui->QVTKRegFixed);
     ui->QVTKRegFixed->SetRenderWindow(m_viewLeft->GetRenderWindow());
     m_viewLeft->SetupInteractor(ui->QVTKRegFixed->GetRenderWindow()->GetInteractor());
     m_viewLeft->GetRenderer()->ResetCamera();
