@@ -7,20 +7,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_viewLeft = vtkImageViewer2::New();
-    ui->QVTKRegFixed->SetRenderWindow(m_viewLeft->GetRenderWindow());
-    m_viewLeft->SetupInteractor(ui->QVTKRegFixed->GetRenderWindow()->GetInteractor());
-    m_viewLeft->GetRenderer()->ResetCamera();
-    m_viewLeft->Render();
-/*
-    qVTKWidget->SetRenderWindow(m_view->GetRenderWindow());
-  m_view->SetupInteractor(qVTKWidget->GetRenderWindow()->GetInteractor());
 
-  m_view->SetInputData(image);
-  m_view->SetSlice(m_view->GetSliceMax() / 2);
-  m_view->GetRenderer()->ResetCamera();
-  m_view->Render();
-  */
-
+    this->InitializeRenderWindow(m_viewLeft, ui->QVTKRegFixed);
+    
     m_viewRight = vtkImageViewer2::New();
     m_viewSeg = vtkImageViewer2::New();
     m_viewCine = vtkImageViewer2::New();
@@ -36,6 +25,16 @@ MainWindow::~MainWindow()
 {
 
     delete ui;
+}
+
+void MainWindow::InitializeRenderWindow(vtkImageViewer2 *m_view,
+        QVTKWidget *qVTKWidget)
+{
+  qVTKWidget->SetRenderWindow(m_view->GetRenderWindow());
+  m_view->SetupInteractor(qVTKWidget->GetRenderWindow()->GetInteractor());
+  qVTKWidget->GetRenderWindow()->SetBackground(0,0,0);
+  m_view->GetRenderer()->ResetCamera();
+  m_view->Render();
 }
 
 int MainWindow::LoadDICOM(
