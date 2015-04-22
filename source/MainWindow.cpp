@@ -14,10 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->InitializeRenderWindow(m_viewRight, ui->QVTKRegMoving);
 
     m_viewSeg = vtkImageViewer2::New();
-    this->InitializeRenderWindow(m_viewSeg, ui->QVTKSeg);
+    //this->InitializeRenderWindow(m_viewSeg, ui->QVTKSeg);
 
     m_viewCine = vtkImageViewer2::New();
-    this->InitializeRenderWindow(m_viewCine, ui->QVTKCineViewer);
+    //this->InitializeRenderWindow(m_viewCine, ui->QVTKCineViewer);
 
     readerFixed = Reader::New();
     readerMoving = Reader::New();
