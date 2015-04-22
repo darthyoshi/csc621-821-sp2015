@@ -7,7 +7,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_viewLeft = vtkImageViewer2::New();
-    m_viewLeft->Render();
+
+    LoadDICOM(readerFixed, m_viewLeft, ui->QVTKRegFixed);
+    ui->QVTKRegFixed->SetRenderWindow(m_viewLeft->GetRenderWindow());
+   
+/*
+    qVTKWidget->SetRenderWindow(m_view->GetRenderWindow());
+  m_view->SetupInteractor(qVTKWidget->GetRenderWindow()->GetInteractor());
+
+  m_view->SetInputData(image);
+  m_view->SetSlice(m_view->GetSliceMax() / 2);
+  m_view->GetRenderer()->ResetCamera();
+  m_view->Render();
+  */
 
     m_viewRight = vtkImageViewer2::New();
     m_viewSeg = vtkImageViewer2::New();
