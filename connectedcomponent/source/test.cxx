@@ -21,19 +21,19 @@ int main (int argc, char *argv[])
     
     typedef  itk::ImageFileWriter< RGBImageType > WriterType;
     
-    //WriterType::Pointer writer = WriterType::New();
+    WriterType::Pointer writer = WriterType::New();
     
-    //writer->SetFileName( argv[2] );
+    writer->SetFileName( argv[2] );
     
     ScalarConnectedComponent<ImageType, RGBImageType, LabelImageType> scc = ScalarConnectedComponent<ImageType, RGBImageType, LabelImageType>();
     
-    scc.SetImage(argv[1]);
+    scc.SetFile(argv[1]);
     scc.SetThreshold(4);
     scc.SetMinSize(20);
     scc.SetFilters();
     scc.GetOutput();
-    //writer->SetInput(scc.GetOutput());
+    writer->SetInput(scc.GetOutput());
     
-    //writer->Update();
+    writer->Update();
     return 0;
 }

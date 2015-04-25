@@ -9,6 +9,7 @@
 #include "itkScalarConnectedComponentImageFilter.h"
 
 #include "itksys/SystemTools.hxx"
+#include <string>
 #include <sstream>
 
 template <typename ImageType, typename RGBImageType, typename LabelImageType>
@@ -35,11 +36,15 @@ class ScalarConnectedComponent
     typedef itk::LabelToRGBImageFilter<LabelImageType, RGBImageType>
     RGBFilterType;
     
-    typedef itk::ImageSeriesReader< ImageType >        ReaderType;
+    typedef itk::ImageSeriesReader< ImageType > SeriesReaderType;
     
-    typedef itk::GDCMImageIO       ImageIOType;
+    typedef itk::GDCMImageIO ImageIOType;
     
     typedef itk::GDCMSeriesFileNames NamesGeneratorType;
+    
+    typedef std::vector< std::string >    SeriesIdContainer;
+    
+    typedef std::vector< std::string >   FileNamesContainer;
     
 private:
     typename ImageType::Pointer image;
@@ -50,6 +55,8 @@ private:
     typename ConnectedComponentImageFilterType::Pointer connected;
     typename RelabelFilterType::Pointer relabel;
     typename RGBFilterType::Pointer rgbFilter;
+    
+    typename SeriesReaderType::Pointer seriesReader;
     
     typename ImageIOType::Pointer dicomIO;
     
@@ -67,9 +74,13 @@ public:
         
         rgbFilter = RGBFilterType::New();
         
+        seriesReader = SeriesReaderType::New();
+        
         dicomIO = ImageIOType::New();
         
         nameGenerator = NamesGeneratorType::New();
+        
+        
     }
     
     void SetImage(char* imgFile)
@@ -79,11 +90,33 @@ public:
         image = reader->GetOutput();
     }
     
-    void SetFile()
+    void SetFile(const std::string path)
     {
-        reader->SetImageIO( dicomIO );
-        reader->Update();
-        image = reader->GetOutput();
+        nameGenerator->SetUseSeriesDetails(true);
+        nameGenerator->SetDirectory(path);
+        
+        const SeriesIdContainer & seriesUID = nameGenerator->GetSeriesUIDs();
+        SeriesIdContainer::const_iterator seriesItr = seriesUID.begin();
+        SeriesIdContainer::const_iterator seriesEnd = seriesUID.end();
+        
+        while( seriesItr != seriesEnd )
+        {
+            std::cout << seriesItr->c_str() << std::endl;
+            ++seriesItr;
+        }
+        
+        std::string seriesIdentifier;
+        
+        seriesIdentifier = seriesUID.begin()->c_str();
+        
+        FileNamesContainer fileNames;
+        
+        fileNames = nameGenerator->GetFileNames( seriesIdentifier );
+        
+        seriesReader->SetImageIO( dicomIO );
+        seriesReader->SetFileNames(fileNames);
+        seriesReader->Update();
+        image = seriesReader->GetOutput();
     }
                  
     
