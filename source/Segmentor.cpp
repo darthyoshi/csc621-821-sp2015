@@ -2,5 +2,13 @@
 
 using namespace vis;
 
-Segmentor::Segmentor(QWidget* parent = 0) : QWidget(parent) {}
+Segmentor::Segmentor() : Stage() {}
+
+QWidget* Segmentor::GetToolbox() {
+  return new QWidget();
+}
+
+QWidget* Segmentor::GetContent() {
+  return new QWidget();
+}
 

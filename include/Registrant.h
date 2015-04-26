@@ -7,19 +7,22 @@
 
 #include "itkImageSeriesReader.h"
 
-#include "Loader.h"
+#include "Stage.h"
 #include "Common.h"
 
 namespace vis {
-  class Registrant : public QWidget {
+
+  class Registrant : public Stage {
 
     Q_OBJECT
 
     typedef itk::ImageSeriesReader<BaseImage> Reader;
 
     public:
-      Registrant(QWidget* parent = 0);
-      vtkRenderWindow* GetRenderWindow() {}
+      Registrant();
+
+      QWidget* GetToolbox();
+      QWidget* GetContent();
 
     signals:
       void RegistrationComplete();

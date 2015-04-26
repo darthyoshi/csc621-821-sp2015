@@ -5,18 +5,22 @@
 
 #include <vtkRenderWindow.h>
 
+#include "Stage.h"
+
 namespace vis {
 
-  class Segmentor : public QWidget {
+  class Segmentor : public Stage {
 
     Q_OBJECT
 
     public:
-      Segmentor(QWidget* parent = 0);
-      vtkRenderWindow* GetRenderWindow() {}
+      Segmentor();
+
+      QWidget* GetContent();
+      QWidget* GetToolbox();
 
     public slots:
-      void Thing() {}
+
   };
 
 }

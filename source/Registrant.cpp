@@ -2,4 +2,12 @@
 
 using namespace vis;
 
-Registrant::Registrant(QWidget* parent = 0) : QWidget(parent) {}
+Registrant::Registrant() : Stage() {}
+
+QWidget* Registrant::GetToolbox() {
+  return new QWidget();
+}
+
+QWidget* Registrant::GetContent() {
+  return new QWidget();
+}

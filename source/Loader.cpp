@@ -3,12 +3,19 @@
 
 using namespace vis;
 
-Loader::Loader(QWidget* parent = 0) : QWidget(parent) {
+Loader::Loader() : Stage() {
+  m_reader = Reader::New();
+  m_converter = Converter::New();
+  m_converter->SetInput(m_reader->GetOutput());
 
-  /**
-   * Setup Interface
-   */
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+  BuildToolbox();
+  BuildContent();
+}
+
+void Loader::BuildToolbox() {
+
+  m_toolBox = new QWidget();
+  m_toolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
   QVBoxLayout* pageLayout = new QVBoxLayout();
 
   QGroupBox* groupBox = new QGroupBox(tr("DICOM Source"));
@@ -32,13 +39,36 @@ Loader::Loader(QWidget* parent = 0) : QWidget(parent) {
   groupBox->setLayout(layout);
 
   pageLayout->addWidget(groupBox);
-  this->setLayout(pageLayout);
+  m_toolBox->setLayout(pageLayout);
 
   connect(loadButton, SIGNAL(clicked()), this, SLOT(LoadDICOMSource()));
 }
 
+void Loader::BuildContent() {
+  m_view = new QVTKWidget();
+  m_viewer = vtkResliceImageViewer::New();
+
+  m_view->SetRenderWindow(m_viewer->GetRenderWindow());
+  m_viewer->SetupInteractor(m_view->GetInteractor());
+
+  vtkResliceCursorLineRepresentation* rep = 
+    vtkResliceCursorLineRepresentation::SafeDownCast(
+        m_viewer->GetResliceCursorWidget()->GetRepresentation());
+  rep->GetResliceCursorActor()->GetCursorAlgorithm()->SetReslicePlaneNormal(1);
+
+  m_viewer->SetInputData(m_converter->GetOutput());
+  m_viewer->SetSliceOrientation(0);
+  m_viewer->SetResliceModeToAxisAligned();
+   
+  m_renderer = m_viewer->GetRenderer();
+  m_renderer->GradientBackgroundOn();
+  m_renderer->SetBackground(0.7, 0.7, 0.7);
+  m_renderer->SetBackground2(0.2, 0.2, 0.2);
+  m_renderer->Render();
+
+}
+
 void Loader::LoadDICOMSource() {
-  Reader::Pointer reader = Reader::New();
 
   QDir dir = QFileDialog::getExistingDirectory(0, "Select Folder: ");
   QFileInfoList list = dir.entryInfoList(QDir::Dirs | QDir::Files | 
@@ -51,17 +81,17 @@ void Loader::LoadDICOMSource() {
 
     names.push_back(str + finfo.fileName().toStdString().c_str());
   }
-  reader->SetFileNames(names);
+  m_reader->SetFileNames(names);
 
   try {
-    reader->Update();
+    m_reader->Update();
   } catch (itk::ExceptionObject& e) {
     CLOG(INFO, "window") << "Failed to load DICOM file: ";
     return;
   }
 
   Reader::DictionaryRawPointer dictionary =
-    (*(reader->GetMetaDataDictionaryArray()))[0];
+    (*(m_reader->GetMetaDataDictionaryArray()))[0];
 
   // Expose the study UID metadata value and show it in our interface label.
   std::string studyUID;
@@ -73,6 +103,23 @@ void Loader::LoadDICOMSource() {
   m_UIDLabel->setText(metrics.elidedText(labelText, Qt::ElideRight,
     m_UIDLabel->width()));
 
-  m_source = reader;
-  emit SourceChanged(m_source->GetOutput());
+  UpdateViewer();
+  emit SourceChanged(m_reader->GetOutput());
+}
+
+QWidget* Loader::GetContent() {
+  return m_view;
+}
+
+QWidget* Loader::GetToolbox() {
+  return m_toolBox;
+}
+
+void Loader::UpdateViewer() {
+  m_converter->SetInput(m_reader->GetOutput());
+  m_converter->Update();
+  m_viewer->SetInputData(m_converter->GetOutput());
+  m_viewer->Reset();
+  m_viewer->GetRenderer()->ResetCamera();
+  m_viewer->Render();
 }
