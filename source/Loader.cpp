@@ -169,7 +169,8 @@ void Loader::LoadDICOMSource() {
   try {
     m_reader->Update();
   } catch (itk::ExceptionObject& e) {
-    CLOG(INFO, "window") << "Failed to load DICOM file: ";
+    CLOG(INFO, "window") << "Failed to load DICOM file: " 
+      << dir.path().toStdString();
     return;
   }
 

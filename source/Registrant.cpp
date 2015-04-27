@@ -76,6 +76,8 @@ void Registrant::LoadMovingImage() {
   QFontMetrics metrics(m_UIDLabel->font());
   m_UIDLabel->setText(metrics.elidedText(labelText, Qt::ElideRight,
     m_UIDLabel->width()));
+
+  // m_reader is valid here, tell the visualize/registration function?
 }
 
 void Registrant::BuildContent() {
