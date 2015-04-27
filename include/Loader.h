@@ -23,10 +23,19 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkResliceImageViewer.h>
+#include <vtkImageSlabReslice.h>
+#include <vtkCommand.h>
 #include <vtkResliceCursorActor.h>
+#include <vtkResliceCursorThickLineRepresentation.h>
+#include <vtkImageMarchingCubes.h>
 #include <vtkResliceCursorWidget.h>
 #include <vtkResliceCursorLineRepresentation.h>
+#include <vtkImagePlaneWidget.h>
+#include <vtkImageData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkCellPicker.h>
 #include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkProperty.h>
 #include <vtkResliceCursorPolyDataAlgorithm.h>
 #include <vtkSmartPointer.h>
 
@@ -60,14 +69,17 @@ namespace vis {
     protected:
       void BuildToolbox();
       void BuildContent();
-      void UpdateViewer();
+      void UpdateView();
+      //void UpdateWidgets();
 
     private:
       Reader::Pointer m_reader;
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
       vtkRenderWindowInteractor* m_interactor;
-      vtkResliceImageViewer* m_viewer;
+      vtkImagePlaneWidget* m_planes[3];
+      vtkImageMarchingCubes* m_surface;
+      vtkPolyDataMapper* m_mapper;
       Converter::Pointer m_converter;
 
       QWidget* m_toolBox;

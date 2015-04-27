@@ -15,20 +15,27 @@ Visualize::Visualize(QWidget* parent = 0) : QMainWindow(parent),
 
   // Master state machine for the application.
   m_loader = new Loader();
-  toolbox->addItem(m_loader->GetToolbox(), tr("Load"));
+  int m_loadIdx = toolbox->addItem(m_loader->GetToolbox(), tr("Load"));
   stack->addWidget(m_loader->GetContent());
 
   m_registrant = new Registrant();
-  toolbox->addItem(m_registrant->GetToolbox(), tr("Register"));
+  int m_registerIdx = toolbox->addItem(m_registrant->GetToolbox(), tr("Register"));
   stack->addWidget(m_registrant->GetContent());
 
   m_segmentor = new Segmentor();
-  toolbox->addItem(m_segmentor->GetToolbox(), tr("Segment"));
+  int m_segmentIdx = toolbox->addItem(m_segmentor->GetToolbox(), tr("Segment"));
   stack->addWidget(m_segmentor->GetContent());
+
+  toolbox->setItemEnabled(m_registerIdx, false);
+  toolbox->setItemEnabled(m_segmentIdx, false);
 
   this->showMaximized();
 
   connect(toolbox, &QToolBox::currentChanged, stack, &QStackedWidget::setCurrentIndex);
+  connect(m_loader, &Loader::SourceChanged, m_registrant, &Registrant::SetFixedSource);
+  connect(m_loader, &Loader::SourceChanged, [=](BaseImage::Pointer b) {
+      toolbox->setItemEnabled(m_registerIdx, true);
+  });
   connect(m_window->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 }
 

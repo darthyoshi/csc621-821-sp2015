@@ -37,6 +37,11 @@ namespace vis {
       Ui::MainWindow* m_window;
       QToolBox* m_toolbox;
 
+      int m_loadIdx;
+      int m_registerIdx;
+      int m_segmentIdx;
+      int m_quantifyIdx;
+
       Loader* m_loader;
       Registrant* m_registrant;
       Segmentor* m_segmentor;
