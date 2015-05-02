@@ -77,7 +77,7 @@ namespace vis {
       QWidget* GetContent();
 
     signals:
-      void RegistrationComplete();
+      void RegistrationComplete(BaseImage::Pointer);
 
     public slots:
       void SetFixedSource(BaseImage::Pointer);

@@ -234,13 +234,12 @@ void Registrant::Register() {
   // Registration is complete at this point. m_resample provides the valid
   // output.
   UpdateView();
+  emit RegistrationComplete(m_resample->GetOutput());
 }
 
 void Registrant::UpdateView() {
   m_checkerBoard->SetInput1(m_fixedImage);
   m_checkerBoard->SetInput2(m_resample->GetOutput());
-  m_resample->SetDefaultPixelValue(0);
-  m_resample->SetTransform(m_finalTransform);
 }
 
 void Registrant::SetFixedSource(BaseImage::Pointer fixed) {
