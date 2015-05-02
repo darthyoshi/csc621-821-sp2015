@@ -158,6 +158,8 @@ void Registrant::Register() {
   
   m_transform->SetRotation(rotation);
 
+  m_fixedCaster->Update();
+  m_registration->SetFixedImageRegion(m_fixedCaster->GetOutput()->GetBufferedRegion());
   m_registration->SetInitialTransformParameters(m_transform->GetParameters());
 
   // Optimizer configuration.
