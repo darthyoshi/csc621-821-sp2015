@@ -33,6 +33,8 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkImagePlaneWidget.h>
+#include <vtkCellPicker.h>
+#include <vtkProperty.h>
 
 #include "itkImageSeriesReader.h"
 #include "itkImageToVTKImageFilter.h"
@@ -100,6 +102,7 @@ namespace vis {
       Reader::Pointer m_reader;
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
+      vtkImagePlaneWidget* m_display;
       vtkRenderWindowInteractor* m_interactor;
       Converter::Pointer m_converter;
 

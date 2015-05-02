@@ -4,8 +4,6 @@ using namespace vis;
 
 Registrant::Registrant() : Stage() {
   m_reader = Reader::New();
-  m_converter = Converter::New();
-  m_converter->SetInput(m_reader->GetOutput());
 
   // Initialize all registration fields.
   m_transform = Transform::New();
@@ -35,6 +33,8 @@ Registrant::Registrant() : Stage() {
   m_finalTransform = Transform::New();
   m_resample = ResampleFilter::New();
   m_checkerBoard = CheckerBoardFilter::New();
+  m_converter = Converter::New();
+  m_converter->SetInput(m_checkerBoard->GetOutput());
 
   BuildToolbox();
   BuildContent();
@@ -125,6 +125,25 @@ void Registrant::BuildContent() {
   m_renderer->SetOcclusionRatio(0.1);
   m_interactor = m_view->GetInteractor();
 
+  // Setup checkerboard image plane widget.
+  vtkProperty* prop = vtkProperty::New();
+  vtkCellPicker* picker = vtkCellPicker::New();
+  m_display = vtkImagePlaneWidget::New();
+  m_display->SetInteractor(m_interactor);
+  m_display->SetPicker(picker);
+  m_display->RestrictPlaneToVolumeOn();
+  m_display->SetTexturePlaneProperty(prop);
+  m_display->TextureInterpolateOff();
+  m_display->SetResliceInterpolateToLinear();
+  m_display->SetInputData(m_converter->GetOutput());
+  m_display->SetPlaneOrientationToXAxes();
+  m_display->SetSliceIndex(0);
+  m_display->DisplayTextOn();
+  m_display->SetDefaultRenderer(m_renderer);
+  m_display->SetWindowLevel(1358, -27);
+  m_display->On();
+  m_display->InteractionOn();
+
   m_renderer->GradientBackgroundOn();
   m_renderer->SetBackground(0.7, 0.7, 0.7);
   m_renderer->SetBackground2(0.2, 0.2, 0.2);
@@ -166,7 +185,7 @@ void Registrant::Register() {
   typedef Optimizer::ScalesType Scales;
   Scales scales(m_transform->GetNumberOfParameters());
   
-  double data[6] = { 1.0, 1.0, 1.0, 0.001, 0.001, 0.001 };
+  double data[6] = { 1/50.0,  1/50.0,  1/50.0f, 10.0, 10.0, 10.0 };
   scales.SetData(data, 6, false);
   m_optimizer->SetScales(scales);
 
@@ -242,6 +261,11 @@ void Registrant::Register() {
 void Registrant::UpdateView() {
   m_checkerBoard->SetInput1(m_fixedImage);
   m_checkerBoard->SetInput2(m_resample->GetOutput());
+  m_converter->Update();
+
+  m_display->SetInputData(m_converter->GetOutput());
+  m_display->UpdatePlacement();
+  m_renderer->ResetCamera();
 }
 
 void Registrant::SetFixedSource(BaseImage::Pointer fixed) {

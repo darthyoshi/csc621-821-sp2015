@@ -163,7 +163,6 @@ void Loader::LoadDICOMSource() {
     str.append("/");
 
     names.push_back(str + finfo.fileName().toStdString().c_str());
-    CLOG(INFO, "window") << str + finfo.fileName().toStdString();
   }
   m_reader->SetFileNames(names);
 
