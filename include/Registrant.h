@@ -46,8 +46,7 @@
 
 namespace vis {
 
-  class Registrant : public Stage {
-
+  class Registrant : public Stage { 
     Q_OBJECT
 
     protected:
@@ -109,9 +108,10 @@ namespace vis {
       QWidget* m_toolBox;
       QVTKWidget* m_view;
 
-      // Interface Elements
+      // Salient Interface Elements
       QLabel* m_UIDLabel;
       QLabel* m_slicesLabel;
+      QPushButton* m_runButton;
 
       BaseImage::Pointer m_fixedImage;
       Transform::Pointer m_transform;

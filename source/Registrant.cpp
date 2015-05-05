@@ -61,15 +61,20 @@ void Registrant::BuildToolbox() {
   details->addWidget(slicesLabel, 2, 0);
   details->addWidget(m_slicesLabel, 2, 1);
 
+  this->m_runButton = new QPushButton(tr("Register"));
+  m_runButton->setDisabled(true);
+
   loadLayout->addWidget(loadButton);
   loadLayout->addItem(details);
   loadingBox->setLayout(loadLayout);
 
   // Add block elements to the page.
   pageLayout->addWidget(loadingBox);
+  pageLayout->addWidget(m_runButton);
   m_toolBox->setLayout(pageLayout);
 
   connect(loadButton, SIGNAL(clicked()), this, SLOT(LoadMovingImage()));
+  connect(m_runButton, SIGNAL(clicked()), this, SLOT(Register()));
 }
 
 void Registrant::LoadMovingImage() {
@@ -106,9 +111,8 @@ void Registrant::LoadMovingImage() {
   m_UIDLabel->setText(metrics.elidedText(labelText, Qt::ElideRight,
     m_UIDLabel->width()));
 
-  // TODO: Enable button that kicks off actual registration process.
   m_movingCaster->SetInput(m_reader->GetOutput());
-  Register();
+  m_runButton->setDisabled(false);
 }
 
 void Registrant::BuildContent() {
