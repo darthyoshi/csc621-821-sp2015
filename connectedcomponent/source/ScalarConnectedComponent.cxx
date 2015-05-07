@@ -1,3 +1,16 @@
+/***************************************************************************
+ * Name: Eric Chu
+ * Course: CSC621 - BioMedical Imaging Analysis
+ * Assignment: Final Project - Group Wind
+ * 
+ * Quantification - Connected Component Analysis
+ * Description: This class takes in a set of DICOM images or a singular DICOM image
+ * and analyzes the connect components of it. The input can be 3D images or 2D
+ * images and filters are placed over it to indicate the separate components.
+ * Data such as size, region, variance, and median are also calculated for each
+ * component.
+ ****************************************************************************/
+
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkLabelToRGBImageFilter.h"
@@ -15,47 +28,55 @@
 template <typename ImageType, typename RGBImageType, typename LabelImageType>
 class ScalarConnectedComponent
 {
-    //const unsigned int Dimension = 2;
+    //these variables are used to create the type of images
     typedef short                                  PixelType;
-    //typedef itk::Image<PixelType, Dimension>       ImageType;
-  
     typedef itk::RGBPixel<unsigned char>           RGBPixelType;
-    //typedef itk::Image<RGBPixelType, Dimension>    RGBImageType;
-    
     typedef unsigned int                           LabelPixelType;
-    //typedef itk::Image<LabelPixelType, Dimension > LabelImageType;
     
+    //variable used to read image files
     typedef itk::ImageFileReader<ImageType> ReaderType;
     
+    //variable used to create each connected component
     typedef itk::ScalarConnectedComponentImageFilter <ImageType, LabelImageType >
     ConnectedComponentImageFilterType;
 
+    //variable used to create data for each connected component
     typedef itk::RelabelComponentImageFilter <LabelImageType, LabelImageType >
     RelabelFilterType;
     
+    //variable used to create the colored filters to show each connected component
     typedef itk::LabelToRGBImageFilter<LabelImageType, RGBImageType>
     RGBFilterType;
     
+    //variable used to read a series of DICOM images
     typedef itk::ImageSeriesReader< ImageType > SeriesReaderType;
     
+    //these variables are used to create the IDs of the generated DICOM images
     typedef itk::GDCMImageIO ImageIOType;
-    
     typedef itk::GDCMSeriesFileNames NamesGeneratorType;
-    
     typedef std::vector< std::string >    SeriesIdContainer;
-    
     typedef std::vector< std::string >   FileNamesContainer;
     
+    
 private:
+    
+    //general
     typename ImageType::Pointer image;
+    
     PixelType distanceThreshold = 4;
-    typename RelabelFilterType::ObjectSizeType minSize;
     
     typename ReaderType::Pointer reader;
+    
+    //filters
+    typename RelabelFilterType::ObjectSizeType minSize;
+    
     typename ConnectedComponentImageFilterType::Pointer connected;
+    
     typename RelabelFilterType::Pointer relabel;
+    
     typename RGBFilterType::Pointer rgbFilter;
     
+    //series
     typename SeriesReaderType::Pointer seriesReader;
     
     typename ImageIOType::Pointer dicomIO;
@@ -64,6 +85,7 @@ private:
     
 public:
     
+    //default constructor to initialize all pointers
     ScalarConnectedComponent()
     {
         reader = ReaderType::New();
@@ -83,6 +105,7 @@ public:
         
     }
     
+    //SetImage reads in a single image file
     void SetImage(char* imgFile)
     {
         reader->SetFileName(imgFile);
@@ -90,8 +113,10 @@ public:
         image = reader->GetOutput();
     }
     
+    //SetFile reads in a folder containing a set of images
     void SetFile(const std::string path)
     {
+        //generates a name for the series for images
         nameGenerator->SetUseSeriesDetails(true);
         nameGenerator->SetDirectory(path);
         
@@ -99,6 +124,7 @@ public:
         SeriesIdContainer::const_iterator seriesItr = seriesUID.begin();
         SeriesIdContainer::const_iterator seriesEnd = seriesUID.end();
         
+        //generates a ID for each image
         while( seriesItr != seriesEnd )
         {
             std::cout << seriesItr->c_str() << std::endl;
@@ -119,17 +145,19 @@ public:
         image = seriesReader->GetOutput();
     }
                  
-    
+    //sets the threshold size for each connected component
     void SetThreshold(int threshold)
     {
         distanceThreshold = static_cast<short>(threshold);
     }
     
+    //sets the minimum size of each connected component
     void SetMinSize(int size)
     {
         minSize = size;
     }
     
+    //sets the filters on each connected component
     void SetFilters()
     {
         connected->SetInput(image);
@@ -140,22 +168,8 @@ public:
         relabel->Update();
         
     }
-    /*
-    void SetConnectedComponentImageFilterType()
-    {
-        connected->SetInput();
-        connected->SetDistanceThreshold(distanceThreshold);
-    }
     
-    void SetRelabelComponentImageFilter()
-    {
-        relabel->SetInput(connected->GetOut)
-        relabel->SetMinimumObjectSize(minSize);
-        relabel->Update();
-        
-        SetLabelToRGBImageFilter();
-    }*/
-    
+    //returns a image file specified by the user or program
     RGBImageType *GetOutput()
     {
         SummarizeLabelStatistics (image.GetPointer(), relabel->GetOutput());
@@ -164,8 +178,7 @@ public:
         rgbFilter->GetOutput();
     }
     
-    
-    
+    //this function outputs the statistics of each connected component
     template<typename TImage, typename TLabelImage>
     void SummarizeLabelStatistics (TImage* image, TLabelImage* labelImage)
     {

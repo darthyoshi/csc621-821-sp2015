@@ -1,3 +1,12 @@
+/***************************************************************************
+ * Name: Eric Chu
+ * Course: CSC621 - BioMedical Imaging Analysis
+ * Assignment: Final Project - Group Wind
+ *
+ * Quantification - Connected Component Analysis
+ * Description: This is a test file for the ScalarConnectedComponent.css file
+ ****************************************************************************/
+
 #include "ScalarConnectedComponent.cxx"
 #include "itkImage.h"
 #include "itkImageFileWriter.h"
@@ -5,6 +14,7 @@
 
 int main (int argc, char *argv[])
 {
+    //Dimension can be changed to 2 or 3 depending on image type
     const unsigned int Dimension = 3;
     typedef short                                  PixelType;
     typedef itk::Image<PixelType, Dimension>       ImageType;
