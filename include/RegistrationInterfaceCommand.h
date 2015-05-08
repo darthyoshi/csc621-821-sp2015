@@ -43,8 +43,8 @@ namespace vis {
           return;
         }
 
-        typename Registration::Pointer registration = 
-          static_cast<typename Registration::Pointer>(object);
+        const Registration* registration = 
+          static_cast<const Registration*>(object);
 
         if(!registration) { return; }
 
