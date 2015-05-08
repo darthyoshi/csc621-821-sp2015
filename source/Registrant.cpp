@@ -190,6 +190,9 @@ void Registrant::Register() {
   m_runButton->setDisabled(true);
   m_runButton->repaint();
 
+  m_optimizerLabel->setText(tr("Starting"));
+  m_optimizerLabel->repaint();
+
   typedef Optimizer::ParametersType ParametersType;
   typedef itk::CenteredTransformInitializer< 
     Transform, InternalImage, InternalImage
