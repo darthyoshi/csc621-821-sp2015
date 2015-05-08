@@ -1,6 +1,9 @@
 #ifndef REGISTRATION_ITERATION_COMMAND_H
 #define REGISTRATION_ITERATION_COMMAND_H
 
+#include "itkObject.h"
+#include "itkSmartPointer.h"
+
 namespace vis {
 
   class RegistrationIterationCommand : public itk::Command {
@@ -23,7 +26,7 @@ namespace vis {
       }
 
       void Execute(const itk::Object* object, const itk::EventObject& event) {
-          Optimizer::Pointer optimizer = static_cast<Optimizer::Pointer>(object);
+          const Optimizer* optimizer = static_cast<const Optimizer*>(object);
 
           if (!(itk::IterationEvent().CheckEvent(&event))) {
             return;
