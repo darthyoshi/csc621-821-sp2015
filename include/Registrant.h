@@ -33,7 +33,12 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkImagePlaneWidget.h>
+#include <vtkVolumeProperty.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkSmartVolumeMapper.h>
+#include <vtkPiecewiseFunction.h>
 #include <vtkCellPicker.h>
+#include <vtkVolume.h>
 #include <vtkProperty.h>
 
 #include "itkImageSeriesReader.h"
@@ -101,7 +106,12 @@ namespace vis {
       Reader::Pointer m_reader;
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
+      vtkColorTransferFunction* m_colorMap;
       vtkImagePlaneWidget* m_display;
+      vtkVolumeProperty* m_property;
+      vtkSmartVolumeMapper* m_mapper;
+      vtkVolume* m_volume;
+      vtkPiecewiseFunction* m_opacityMap;
       vtkRenderWindowInteractor* m_interactor;
       Converter::Pointer m_converter;
 

@@ -2,7 +2,9 @@
 
 using namespace vis;
 
-Segmentor::Segmentor() : Stage() {}
+Segmentor::Segmentor() : Stage() {
+
+}
 
 QWidget* Segmentor::GetToolbox() {
   return new QWidget();

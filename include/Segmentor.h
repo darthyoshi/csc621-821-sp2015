@@ -19,8 +19,6 @@ namespace vis {
       QWidget* GetContent();
       QWidget* GetToolbox();
 
-    public slots:
-
   };
 
 }

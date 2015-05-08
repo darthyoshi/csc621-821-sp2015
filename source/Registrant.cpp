@@ -35,7 +35,7 @@ Registrant::Registrant() : Stage() {
   m_checkerBoard = CheckerBoardFilter::New();
   m_converter = Converter::New();
   m_converter->SetInput(m_checkerBoard->GetOutput());
-
+  
   BuildToolbox();
   BuildContent();
 }
@@ -119,6 +119,34 @@ void Registrant::BuildContent() {
   // Create the main VTK view.
   m_view = new QVTKWidget();
   m_renderer = vtkRenderer::New();
+
+  // Create volume rendering objects.
+  m_opacityMap = vtkPiecewiseFunction::New();
+  m_opacityMap->AddPoint(0.0, 1.0);
+  m_opacityMap->AddPoint(80.0, 1.0);
+  m_opacityMap->AddPoint(80.1, 1.0);
+  m_opacityMap->AddPoint(255.0, 1.0);
+
+  m_colorMap = vtkColorTransferFunction::New();
+  m_colorMap->AddRGBPoint(0.0, 0.0, 0.0, 1.0);
+  m_colorMap->AddRGBPoint(80.0, 1.0, 0.0, 0.0);
+  m_colorMap->AddRGBPoint(255.0, 1.0, 1.0, 1.0);
+
+  m_property = vtkVolumeProperty::New();
+  m_property->ShadeOff();
+  m_property->SetColor(m_colorMap);
+  m_property->SetScalarOpacity(m_opacityMap);
+  m_property->SetInterpolationTypeToLinear();
+
+  m_mapper = vtkSmartVolumeMapper::New();
+  m_mapper->SetBlendModeToMaximumIntensity();
+  m_mapper->SetRequestedRenderModeToRayCastAndTexture();
+
+  m_volume = vtkVolume::New();
+  m_volume->SetMapper(m_mapper);
+  m_volume->SetProperty(m_property);
+  m_renderer->AddViewProp(m_volume);
+  m_renderer->ResetCamera();
 
   // Setup interaction and rendering.
   m_view->GetRenderWindow()->AddRenderer(m_renderer);
@@ -267,9 +295,21 @@ void Registrant::UpdateView() {
   m_checkerBoard->SetInput2(m_resample->GetOutput());
   m_converter->Update();
 
+  CLOG(INFO, "register") << m_converter->GetOutput()->GetDimensions()[0] / 2.0;
+
+  m_display->SetSliceIndex((int)(m_converter->GetOutput()->GetDimensions()[0] / 2.0));
+
   m_display->SetInputData(m_converter->GetOutput());
   m_display->UpdatePlacement();
+
+  m_mapper->SetInputData(m_converter->GetOutput());
+  m_mapper->SetRequestedRenderModeToRayCast();
+
+  m_mapper->Update();
+  m_volume->Update();
+
   m_renderer->ResetCamera();
+  m_renderer->Render();
 }
 
 void Registrant::SetFixedSource(BaseImage::Pointer fixed) {

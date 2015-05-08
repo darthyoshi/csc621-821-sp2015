@@ -13,7 +13,6 @@ Visualize::Visualize(QWidget* parent = 0) : QMainWindow(parent),
   m_window->sideBar->layout()->addWidget(toolbox);
   m_window->mainArea->layout()->addWidget(stack);
 
-  // Master state machine for the application.
   m_loader = new Loader();
   int m_loadIdx = toolbox->addItem(m_loader->GetToolbox(), tr("Load"));
   stack->addWidget(m_loader->GetContent());
