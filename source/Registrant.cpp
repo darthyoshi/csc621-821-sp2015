@@ -187,6 +187,9 @@ void Registrant::BuildContent() {
 }
 
 void Registrant::Register() {
+  m_runButton->setDisabled(true);
+  m_runButton->repaint();
+
   typedef Optimizer::ParametersType ParametersType;
   typedef itk::CenteredTransformInitializer< 
     Transform, InternalImage, InternalImage
@@ -293,6 +296,7 @@ void Registrant::Register() {
   // output.
   UpdateView();
   emit RegistrationComplete(m_resample->GetOutput());
+  m_runButton->setDisabled(false);
 }
 
 void Registrant::UpdateView() {
