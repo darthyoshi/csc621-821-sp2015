@@ -53,13 +53,17 @@ void Registrant::BuildToolbox() {
   QGridLayout* details = new QGridLayout();
   QLabel* nameLabel = new QLabel(tr("<b>Name:</b>"));
   QLabel* slicesLabel = new QLabel(tr("<b>Slices:</b>"));
+  QLabel* optimizerLabel = new QLabel(tr("<b>Metric Value:</b>"));
 
   m_UIDLabel = new QLabel(tr("-"));
   m_slicesLabel = new QLabel(tr("-"));
+  m_optimizerLabel = new QLabel(tr("-"));
   details->addWidget(nameLabel, 1, 0);
   details->addWidget(m_UIDLabel, 1, 1);
   details->addWidget(slicesLabel, 2, 0);
   details->addWidget(m_slicesLabel, 2, 1);
+  details->addWidget(optimizerLabel, 3, 0);
+  details->addWidget(m_optimizerLabel, 3, 1);
 
   this->m_runButton = new QPushButton(tr("Register"));
   m_runButton->setDisabled(true);
@@ -230,6 +234,7 @@ void Registrant::Register() {
   // Set up observer callbacks to inspect the registration.
   RegistrationIterationCommand::Pointer observer = 
     RegistrationIterationCommand::New();
+  observer->label = m_optimizerLabel;
 
   typedef RegistrationInterfaceCommand<Registration> InterfaceCommand;
   InterfaceCommand::Pointer interfaceCallback = InterfaceCommand::New();

@@ -1,6 +1,8 @@
 #ifndef REGISTRATION_ITERATION_COMMAND_H
 #define REGISTRATION_ITERATION_COMMAND_H
 
+#include <QLabel>
+
 #include "itkObject.h"
 #include "itkSmartPointer.h"
 
@@ -20,6 +22,7 @@ namespace vis {
       RegistrationIterationCommand() {}
 
     public:
+      QLabel* label;
 
       void Execute(itk::Object* caller, const itk::EventObject& event) {
         Execute((const itk::Object*)caller, event);
@@ -36,6 +39,9 @@ namespace vis {
             << std::setw(15) << optimizer->GetCurrentIteration()
             << std::setw(15) << optimizer->GetValue() 
             << std::setw(15) << optimizer->GetCurrentPosition();
+
+          label->setText(QLabel::tr(std::to_string(optimizer->GetValue()).c_str()));
+          label->repaint();
       }
   };
 }

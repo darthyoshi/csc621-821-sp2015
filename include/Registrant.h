@@ -121,6 +121,7 @@ namespace vis {
       // Salient Interface Elements
       QLabel* m_UIDLabel;
       QLabel* m_slicesLabel;
+      QLabel* m_optimizerLabel;
       QPushButton* m_runButton;
 
       BaseImage::Pointer m_fixedImage;
