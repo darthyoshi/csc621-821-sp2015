@@ -30,9 +30,9 @@ void Quantifier::BuildToolbox() {
   QLabel* slicesLabel = new QLabel(tr("<b>Slice:</b>"));
 
   m_modeLabel = new QLabel(tr(m_labels[0].c_str()));
-  m_modeLabel->setAlignment(2);
+  m_modeLabel->setAlignment(Qt::AlignRight);
   m_slicesLabel = new QLabel(tr("-"));
-  m_slicesLabel->setAlignment(2);
+  m_slicesLabel->setAlignment(Qt::AlignRight);
 
   details->addWidget(m_modeLabel, 1, 1);
   details->addWidget(nameLabel, 1, 0);
