@@ -89,7 +89,7 @@ namespace vis {
       int m_currentSlice;
       bool m_3Dmode;
 
-      const std::vector<std::string> m_labels = {"Maximum Intensity Projection","Cine-View"};
+      const std::string m_labels[2] = {"Maximum Intensity Projection","Cine-View"};
   };
 }
 
