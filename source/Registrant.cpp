@@ -32,6 +32,8 @@ Registrant::Registrant() : Stage() {
   // Create filters for post-registration.
   m_finalTransform = Transform::New();
   m_resample = ResampleFilter::New();
+  m_histmatch = HistogramMatchingFilter::New();
+  m_histmatch->SetSourceImage(m_resample->GetOutput());
   m_checkerBoard = CheckerBoardFilter::New();
   m_converter = Converter::New();
   m_converter->SetInput(m_checkerBoard->GetOutput());
@@ -293,18 +295,23 @@ void Registrant::Register() {
   m_resample->SetOutputSpacing(m_fixedImage->GetSpacing());
   m_resample->SetOutputDirection(m_fixedImage->GetDirection());
   m_resample->SetDefaultPixelValue(m_greyLevel);
-  m_resample->Update();
 
-  // Registration is complete at this point. m_resample provides the valid
+  // rescale registered moving input to fixed input intensity
+  m_histmatch->ThresholdAtMeanIntensityOn();
+  m_histmatch->SetNumberOfHistogramLevels(m_histogramBins);
+  m_histmatch->SetNumberOfMatchPoints(m_histogramSamples);
+  m_histmatch->Update();
+
+  // Registration is complete at this point. m_histmatch provides the valid
   // output.
   UpdateView();
-  emit RegistrationComplete(m_resample->GetOutput());
+  emit RegistrationComplete(m_histmatch->GetOutput());
   m_runButton->setDisabled(false);
 }
 
 void Registrant::UpdateView() {
   m_checkerBoard->SetInput1(m_fixedImage);
-  m_checkerBoard->SetInput2(m_resample->GetOutput());
+  m_checkerBoard->SetInput2(m_histmatch->GetOutput());
   m_converter->Update();
 
   CLOG(INFO, "register") << m_converter->GetOutput()->GetDimensions()[0] / 2.0;
@@ -327,6 +334,7 @@ void Registrant::UpdateView() {
 void Registrant::SetFixedSource(BaseImage::Pointer fixed) {
   m_fixedImage = fixed;
   m_fixedCaster->SetInput(fixed);
+  m_histmatch->SetReferenceImage(fixed);
 }
 
 QWidget* Registrant::GetToolbox() {

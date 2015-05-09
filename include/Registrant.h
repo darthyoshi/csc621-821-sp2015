@@ -27,6 +27,7 @@
 #include "itkGDCMSeriesFileNames.h"
 #include "itkResampleImageFilter.h"
 #include "itkCastImageFilter.h"
+#include "itkHistogramMatchingImageFilter.h"
 #include "itkCheckerBoardImageFilter.h"
 #include "itkCommand.h"
 
@@ -74,7 +75,9 @@ namespace vis {
       > ImagePyramid;
       typedef itk::CastImageFilter<BaseImage, InternalImage> CastFilter;
       typedef itk::ResampleImageFilter<BaseImage, BaseImage> ResampleFilter;
+      typedef itk::HistogramMatchingImageFilter< BaseImage, BaseImage > HistogramMatchingFilter;
       typedef itk::CheckerBoardImageFilter<BaseImage> CheckerBoardFilter;
+      
 
     public:
       Registrant();
@@ -136,6 +139,7 @@ namespace vis {
       CastFilter::Pointer m_movingCaster;
       Transform::Pointer m_finalTransform;
       ResampleFilter::Pointer m_resample;
+      HistogramMatchingFilter::Pointer m_histmatch;
       CheckerBoardFilter::Pointer m_checkerBoard;
 
   };
