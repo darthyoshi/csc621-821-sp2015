@@ -1,4 +1,3 @@
-#include <Visualize.h>
 #include "Quantifier.h"
 
 using namespace vis;
@@ -122,6 +121,4 @@ void Quantifier::ToggleMode() {
   m_viewer->GetImageActor()->SetVisibility(!m_3Dmode);
   m_renderer->ResetCamera();
   m_viewer->Render();
-
-  //TODO: toggle MIP
 }

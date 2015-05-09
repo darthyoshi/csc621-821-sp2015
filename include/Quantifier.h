@@ -61,9 +61,6 @@ namespace vis {
       QWidget* GetToolbox();
       QWidget* GetContent();
 
-//    signals:
-//      void SourceChanged(BaseImage::Pointer);
-
     public slots:
       void UpdateImage(BaseImage::Pointer);
       void ToggleMode();
