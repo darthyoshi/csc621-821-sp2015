@@ -15,6 +15,7 @@
 #include "Loader.h"
 #include "Registrant.h"
 #include "Segmentor.h"
+#include "Quantifier.h"
 #include "Common.h"
 
 #include "ui_Window.h"
@@ -45,6 +46,7 @@ namespace vis {
       Loader* m_loader;
       Registrant* m_registrant;
       Segmentor* m_segmentor;
+      Quantifier* m_quantifier;
   };
 }
 

@@ -38,7 +38,7 @@ void Segmentor::SetMovingImage(BaseImage::Pointer movingImage){
 
 //copied from Loader.cpp - probably needs fixing
 void Segmentor::BuildToolbox() {
-  m_toolBox = new QWidget();
+/*  m_toolBox = new QWidget();
   m_toolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
   QVBoxLayout* pageLayout = new QVBoxLayout();
 
@@ -65,12 +65,12 @@ void Segmentor::BuildToolbox() {
   pageLayout->addWidget(groupBox);
   m_toolBox->setLayout(pageLayout);
 
-  connect(loadButton, SIGNAL(clicked()), this, SLOT(LoadDICOMSource()));
+  connect(loadButton, SIGNAL(clicked()), this, SLOT(LoadDICOMSource()));*/
 }
 
 void Segmentor::BuildContent() {
   // Create the main VTK view.
-  m_view = new QVTKWidget();
+/*  m_view = new QVTKWidget();
   m_renderer = vtkRenderer::New();
 
   // Setup interaction and rendering.
@@ -86,5 +86,5 @@ void Segmentor::BuildContent() {
   m_renderer->GradientBackgroundOn();
   m_renderer->SetBackground(0.7, 0.7, 0.7);
   m_renderer->SetBackground2(0.2, 0.2, 0.2);
-  m_renderer->Render();
+  m_renderer->Render();*/
 }
