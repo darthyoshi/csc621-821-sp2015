@@ -7,7 +7,7 @@ Quantifier::Quantifier() : Stage() {
   m_converter = Converter::New();
 
   m_viewer = vtkSmartPointer<vtkImageViewer2>::New();
-  m_3Dmode = false;
+  m_3Dmode = true;
 
   BuildToolbox();
   BuildContent();
@@ -30,8 +30,11 @@ void Quantifier::BuildToolbox() {
   QLabel* nameLabel = new QLabel(tr("Current Mode"));
   QLabel* slicesLabel = new QLabel(tr("<b>Slice:</b>"));
 
-  m_modeLabel = new QLabel(tr("-"));
+  m_modeLabel = new QLabel(tr(m_labels[0].c_str()));
+  m_modeLabel->setAlignment(2);
   m_slicesLabel = new QLabel(tr("-"));
+  m_slicesLabel->setAlignment(2);
+
   details->addWidget(m_modeLabel, 1, 1);
   details->addWidget(nameLabel, 1, 0);
   details->addWidget(slicesLabel, 2, 0);
@@ -50,7 +53,7 @@ void Quantifier::BuildToolbox() {
 void Quantifier::BuildContent() {
   // Create the main VTK view.
   m_view = new QVTKWidget();
-  m_renderer = vtkRenderer::New();
+  m_renderer = vtkSmartPointer<vtkRenderer>::New();
 
   // Setup interaction and rendering.
   m_view->GetRenderWindow()->AddRenderer(m_renderer);
@@ -69,7 +72,8 @@ void Quantifier::BuildContent() {
 
   //render cine-view
   m_viewer->SetRenderWindow(m_view->GetRenderWindow());
-  m_viewer->GetImageActor()->SetVisibility(m_3Dmode);
+  m_viewer->SetRenderer(m_renderer);
+  m_viewer->GetImageActor()->SetVisibility(!m_3Dmode);
 
   //TODO: render MIP
 }
@@ -82,6 +86,7 @@ void Quantifier::UpdateImage(BaseImage::Pointer image) {
   m_viewer->SetInputData(m_converter->GetOutput());
 
   m_currentSlice = (m_viewer->GetSliceMin() + m_viewer->GetSliceMax()) / 2;
+  m_slicesLabel->setText(QString::number(m_currentSlice));
 }
 
 QWidget* Quantifier::GetContent() {
@@ -95,6 +100,8 @@ QWidget* Quantifier::GetToolbox() {
 void Quantifier::UpdateView() {
   //update cine-view slice
   if(!m_3Dmode) {
+    m_slicesLabel->setText(QString::number(m_currentSlice));
+
     m_viewer->SetSlice(m_currentSlice);
     m_viewer->Render();
   }
@@ -107,10 +114,13 @@ void Quantifier::UpdateView() {
 
 void Quantifier::ToggleMode() {
   m_3Dmode = !m_3Dmode;
-  //TODO: sidebar needs to be updated when changing modes
 
+  //TODO: sidebar needs to be updated when changing modes
+  m_modeLabel->setText(QString::fromStdString(m_labels[(m_3Dmode?0:1)]));
+  
   //toggle cine-view
-  m_viewer->GetImageActor()->SetVisibility(m_3Dmode);
+  m_viewer->GetImageActor()->SetVisibility(!m_3Dmode);
+  m_renderer->ResetCamera();
   m_viewer->Render();
 
   //TODO: toggle MIP

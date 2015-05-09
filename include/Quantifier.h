@@ -75,7 +75,7 @@ namespace vis {
       //void UpdateWidgets();
 
     private:
-      vtkRenderer* m_renderer;
+      vtkSmartPointer<vtkRenderer> m_renderer;
       vtkRenderWindowInteractor* m_interactor;
       Converter::Pointer m_converter;
       vtkSmartPointer<vtkImageViewer2> m_viewer;
@@ -89,7 +89,7 @@ namespace vis {
       int m_currentSlice;
       bool m_3Dmode;
 
-      const std::string m_labels[2] = {"Maximum Intensity Projection","Cine-View"};
+      const std::string m_labels[2] = {"MIP","Cine-View"};
   };
 }
 
