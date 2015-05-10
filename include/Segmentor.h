@@ -82,6 +82,8 @@ namespace vis {
       QSlider* m_minSlider;
       QSlider* m_maxSlider;
 
+      bool m_firstUpdateView;
+
       void BuildToolbox();
       void BuildContent();
       void UpdateView();

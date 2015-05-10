@@ -16,6 +16,8 @@ Segmentor::Segmentor() : Stage() {
   // Initialize VTK pipeline and view objects.
   m_plane = vtkImagePlaneWidget::New();
 
+  m_firstUpdateView = true;
+
   BuildToolbox();
   BuildContent();
 }
@@ -30,10 +32,12 @@ QWidget* Segmentor::GetContent() {
 
 void Segmentor::SetFixedImage(BaseImage::Pointer fixedImage){
   m_subtract->SetInput1(fixedImage);
+  m_firstUpdateView = true;
 }
 
 void Segmentor::SetMovingImage(BaseImage::Pointer movingImage){
   m_subtract->SetInput2(movingImage);
+  m_firstUpdateView = true;
   Segment();
 }
 
@@ -99,8 +103,8 @@ void Segmentor::BuildToolbox() {
 
 // Run the actual segmentation process here.
 void Segmentor::Segment() {
-  m_subtract->Update();
-  emit SegmentationComplete(m_subtract->GetOutput());
+  m_threshold->Update();
+  emit SegmentationComplete(m_threshold->GetOutput());
   UpdateView();
 }
 
@@ -144,15 +148,23 @@ void Segmentor::BuildContent() {
 }
 
 void Segmentor::UpdateView() {
+  int curr_slice = m_plane->GetSliceIndex();
   m_threshold->Update();
   m_converter->SetInput(m_threshold->GetOutput());
   m_converter->Update();
 
   m_plane->SetInputData(m_converter->GetOutput());
-  m_plane->SetSliceIndex((int)(m_converter->GetOutput()->GetDimensions()[0] / 2.0));
+  if (m_firstUpdateView) {
+    m_plane->SetSliceIndex((int)(m_converter->GetOutput()->GetDimensions()[0] / 2.0));
+  } else {
+    m_plane->SetSliceIndex(curr_slice);
+  }
 
   m_plane->UpdatePlacement();
 
-  m_renderer->ResetCamera();
+  if (m_firstUpdateView) {
+    m_renderer->ResetCamera();
+    m_firstUpdateView = false;
+  }
   m_view->GetRenderWindow()->Render();
 }
