@@ -149,5 +149,10 @@ void Segmentor::UpdateView() {
   m_converter->Update();
 
   m_plane->SetInputData(m_converter->GetOutput());
+  m_plane->SetSliceIndex((int)(m_converter->GetOutput()->GetDimensions()[0] / 2.0));
+
+  m_plane->UpdatePlacement();
+
+  m_renderer->ResetCamera();
   m_view->GetRenderWindow()->Render();
 }
