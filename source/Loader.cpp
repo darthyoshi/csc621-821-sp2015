@@ -211,5 +211,5 @@ void Loader::UpdateView() {
   }
 
   m_renderer->ResetCamera();
-  m_view->GetRenderWindow()->Render();
+  m_renderer->Render();
 }
