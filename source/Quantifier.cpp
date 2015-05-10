@@ -8,7 +8,7 @@ Quantifier::Quantifier() : Stage() {
 
   // VTK rendering elements.
   m_imageView = vtkImageViewer2::New();
-  m_3Dmode = false;
+  m_3Dmode = true;
 
   BuildToolbox();
   BuildContent();
@@ -16,7 +16,7 @@ Quantifier::Quantifier() : Stage() {
 
 void Quantifier::BuildToolbox() {
   //TODO: needs UI stuff for MIP
-  //TODO: needs UI stuff for iterating through cine-view slices
+  //TODO: need to disable vtkInteractorStyle for cine-view
 
   m_toolBox = new QWidget();
   m_toolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
@@ -36,10 +36,15 @@ void Quantifier::BuildToolbox() {
   m_slicesLabel = new QLabel(tr("-"));
   m_slicesLabel->setAlignment(Qt::AlignRight);
 
+  m_sliceSlider = new QSlider();
+  m_sliceSlider->hide();
+  m_sliceSlider->setTracking(true);
+
   details->addWidget(m_modeLabel, 1, 1);
   details->addWidget(nameLabel, 1, 0);
   details->addWidget(slicesLabel, 2, 0);
   details->addWidget(m_slicesLabel, 2, 1);
+  details->addWidget(m_sliceSlider, 3, 1);
 
   layout->addWidget(toggleButton);
   layout->addItem(details);
@@ -49,6 +54,7 @@ void Quantifier::BuildToolbox() {
   m_toolBox->setLayout(pageLayout);
 
   connect(toggleButton, SIGNAL(clicked()), this, SLOT(ToggleMode()));
+  connect(m_sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(UpdateSlices()));
 }
 
 void Quantifier::BuildContent() {
@@ -71,7 +77,7 @@ void Quantifier::BuildContent() {
   m_renderer->SetBackground(0.7, 0.7, 0.7);
   m_renderer->SetBackground2(0.2, 0.2, 0.2);
   m_renderer->Render();
-  
+
   //TODO: render MIP
 }
 
@@ -82,8 +88,11 @@ void Quantifier::UpdateImage(BaseImage::Pointer image) {
   //TODO: needs to accept blob image if available
   m_imageView->SetInputData(m_converter->GetOutput());
 
-  m_currentSlice = (m_imageView->GetSliceMin() + m_imageView->GetSliceMax()) / 2;
   m_slicesLabel->setText(QString::number(m_currentSlice));
+
+  m_sliceSlider->setMinimum(m_imageView->GetSliceMin());
+  m_sliceSlider->setMaximum(m_imageView->GetSliceMax());
+  m_currentSlice = m_imageView->GetSliceMin();
 }
 
 QWidget* Quantifier::GetContent() {
@@ -94,26 +103,37 @@ QWidget* Quantifier::GetToolbox() {
   return m_toolBox;
 }
 
-void Quantifier::UpdateView() {
+void Quantifier::UpdateSlices() {
   //update cine-view slice
-  if(!m_3Dmode) {
-    m_slicesLabel->setText(QString::number(m_currentSlice));
+  m_currentSlice = m_sliceSlider->value();
 
-    m_imageView->SetSlice(m_currentSlice);
-    m_imageView->Render();
-  } else {
+  m_slicesLabel->setText(QString::number(m_currentSlice));
 
-  }
+  m_imageView->SetSlice(m_currentSlice);
+  m_imageView->Render();
 }
 
 void Quantifier::ToggleMode() {
   m_3Dmode = !m_3Dmode;
 
   //TODO: sidebar needs to be updated when changing modes
-  m_modeLabel->setText(QString::fromStdString(m_labels[(m_3Dmode?0:1)]));
-  
+  std::string* label;
+
+  if(m_3Dmode) {
+    m_sliceSlider->hide();
+    label = &m_labels[0];
+  }
+
+  else {
+    m_sliceSlider->show();
+    label = &m_labels[1];
+  }
+  m_modeLabel->setText(QString::fromStdString(*label));
+
   //toggle cine-view
   m_imageView->GetImageActor()->SetVisibility(!m_3Dmode);
   m_renderer->ResetCamera();
   m_imageView->Render();
+
+  //TODO: toggle MIP
 }

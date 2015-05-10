@@ -64,11 +64,11 @@ namespace vis {
     public slots:
       void UpdateImage(BaseImage::Pointer);
       void ToggleMode();
+      void UpdateSlices();
 
     protected:
       void BuildToolbox();
       void BuildContent();
-      void UpdateView();
 
     private:
       vtkRenderer* m_renderer;
@@ -81,6 +81,8 @@ namespace vis {
 
       QLabel* m_modeLabel;
       QLabel* m_slicesLabel;
+
+      QSlider* m_sliceSlider;
 
       int m_currentSlice;
       bool m_3Dmode;
