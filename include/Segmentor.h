@@ -24,6 +24,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkResliceImageViewer.h>
 #include <vtkImageSlabReslice.h>
+#include <vtkImageViewer2.h>
 #include <vtkCommand.h>
 #include <vtkResliceCursorActor.h>
 #include <vtkResliceCursorThickLineRepresentation.h>
@@ -51,14 +52,15 @@ namespace vis {
     Q_OBJECT
 
     protected:
-    	typedef itk::SubtractImageFilter<
+      typedef itk::SubtractImageFilter<
         BaseImage, BaseImage, BaseImage
       > SubtractFilter;
 
     private:
-      SubtractFilter* m_subtractFilter;
+      SubtractFilter::Pointer m_subtractFilter;
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
+      vtkImageViewer2* m_imageView;
       vtkRenderWindowInteractor* m_interactor;
 
       QWidget* m_toolBox;
@@ -69,9 +71,11 @@ namespace vis {
 
       void BuildToolbox();
       void BuildContent();
+      void UpdateView();
 
     public:
       Segmentor();
+      void Segment();
 
       QWidget* GetContent();
       QWidget* GetToolbox();
@@ -79,7 +83,6 @@ namespace vis {
     public slots:
 	    void SetFixedImage(BaseImage::Pointer);
 	    void SetMovingImage(BaseImage::Pointer);
-
   };
 
 }

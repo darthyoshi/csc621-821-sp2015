@@ -3,9 +3,11 @@
 using namespace vis;
 
 Quantifier::Quantifier() : Stage() {
+  // ITK pipeline elements.
   m_converter = Converter::New();
 
-  m_viewer = vtkSmartPointer<vtkImageViewer2>::New();
+  // VTK rendering elements.
+  m_imageView = vtkImageViewer2::New();
   m_3Dmode = true;
 
   BuildToolbox();
@@ -52,28 +54,24 @@ void Quantifier::BuildToolbox() {
 void Quantifier::BuildContent() {
   // Create the main VTK view.
   m_view = new QVTKWidget();
-  m_renderer = vtkSmartPointer<vtkRenderer>::New();
+  m_renderer = vtkRenderer::New();
 
   // Setup interaction and rendering.
-  m_view->GetRenderWindow()->AddRenderer(m_renderer);
-  m_view->GetRenderWindow()->SetAlphaBitPlanes(true);
-  m_view->GetRenderWindow()->SetMultiSamples(0);
-//  m_renderer->SetUseDepthPeeling(true);
-//  m_renderer->SetMaximumNumberOfPeels(50);
+  m_renderer->SetUseDepthPeeling(true);
+  m_renderer->SetMaximumNumberOfPeels(50);
   m_renderer->SetOcclusionRatio(0.1);
-  m_interactor = m_view->GetInteractor();
+
+  //render cine-view
+  m_view->SetRenderWindow(m_imageView->GetRenderWindow());
+  m_imageView->SetRenderer(m_renderer);
+  m_imageView->GetImageActor()->SetVisibility(!m_3Dmode);
 
   // Set render background.
   m_renderer->GradientBackgroundOn();
   m_renderer->SetBackground(0.7, 0.7, 0.7);
   m_renderer->SetBackground2(0.2, 0.2, 0.2);
   m_renderer->Render();
-
-  //render cine-view
-  m_viewer->SetRenderWindow(m_view->GetRenderWindow());
-  m_viewer->SetRenderer(m_renderer);
-  m_viewer->GetImageActor()->SetVisibility(!m_3Dmode);
-
+  
   //TODO: render MIP
 }
 
@@ -82,9 +80,9 @@ void Quantifier::UpdateImage(BaseImage::Pointer image) {
   m_converter->Update();
 
   //TODO: needs to accept blob image if available
-  m_viewer->SetInputData(m_converter->GetOutput());
+  m_imageView->SetInputData(m_converter->GetOutput());
 
-  m_currentSlice = (m_viewer->GetSliceMin() + m_viewer->GetSliceMax()) / 2;
+  m_currentSlice = (m_imageView->GetSliceMin() + m_imageView->GetSliceMax()) / 2;
   m_slicesLabel->setText(QString::number(m_currentSlice));
 }
 
@@ -101,12 +99,9 @@ void Quantifier::UpdateView() {
   if(!m_3Dmode) {
     m_slicesLabel->setText(QString::number(m_currentSlice));
 
-    m_viewer->SetSlice(m_currentSlice);
-    m_viewer->Render();
-  }
-
-  //MIP stuff
-  else {
+    m_imageView->SetSlice(m_currentSlice);
+    m_imageView->Render();
+  } else {
 
   }
 }
@@ -118,7 +113,7 @@ void Quantifier::ToggleMode() {
   m_modeLabel->setText(QString::fromStdString(m_labels[(m_3Dmode?0:1)]));
   
   //toggle cine-view
-  m_viewer->GetImageActor()->SetVisibility(!m_3Dmode);
+  m_imageView->GetImageActor()->SetVisibility(!m_3Dmode);
   m_renderer->ResetCamera();
-  m_viewer->Render();
+  m_imageView->Render();
 }

@@ -69,13 +69,12 @@ namespace vis {
       void BuildToolbox();
       void BuildContent();
       void UpdateView();
-      //void UpdateWidgets();
 
     private:
-      vtkSmartPointer<vtkRenderer> m_renderer;
+      vtkRenderer* m_renderer;
       vtkRenderWindowInteractor* m_interactor;
+      vtkImageViewer2* m_imageView;
       Converter::Pointer m_converter;
-      vtkSmartPointer<vtkImageViewer2> m_viewer;
 
       QWidget* m_toolBox;
       QVTKWidget* m_view;
