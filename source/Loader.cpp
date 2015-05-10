@@ -87,11 +87,6 @@ void Loader::BuildContent() {
 
   // Setup interaction and rendering.
   m_view->GetRenderWindow()->AddRenderer(m_renderer);
-  m_view->GetRenderWindow()->SetAlphaBitPlanes(true);
-  m_view->GetRenderWindow()->SetMultiSamples(0);
-  m_renderer->SetUseDepthPeeling(true);
-  m_renderer->SetMaximumNumberOfPeels(50);
-  m_renderer->SetOcclusionRatio(0.1);
   m_interactor = m_view->GetInteractor();
 
   // Setup windowing callback.
@@ -122,32 +117,40 @@ void Loader::BuildContent() {
     m_planes[i]->SetPlaneOrientation(i);
     m_planes[i]->SetSliceIndex(0);
     m_planes[i]->DisplayTextOn();
-    m_planes[i]->SetDefaultRenderer(m_renderer);
+    //m_planes[i]->SetDefaultRenderer(m_renderer);
     m_planes[i]->SetWindowLevel(1358, -27);
-    m_planes[i]->On();
+    //m_planes[i]->On();
     m_planes[i]->InteractionOn();
   }
 
   // Setup volume rendering.
-  m_surface = vtkImageMarchingCubes::New();
-  m_surface->SetInputData(m_converter->GetOutput());
-  m_surface->ComputeNormalsOn();
-  m_surface->ComputeGradientsOff();
-  m_surface->SetValue(0, 1000);
+  m_mapper = vtkSmartVolumeMapper::New();
+  m_mapper->SetBlendModeToMaximumIntensity();
+  m_mapper->SetRequestedRenderModeToRayCast();
 
-  m_mapper = vtkPolyDataMapper::New();
-  m_mapper->SetInputConnection(m_surface->GetOutputPort());
-  m_mapper->ScalarVisibilityOff();
+  vtkColorTransferFunction* colorFunc = vtkColorTransferFunction::New();
+  colorFunc->AddRGBSegment(1000.0, 1.0, 1.0, 1.0, 20000.0, 1.0, 0.5, 0.75);
 
-  vtkActor* actor = vtkActor::New();
-  actor->GetProperty()->SetColor(1.0, 0.0, 0.0);
-  actor->SetMapper(m_mapper);
-  m_renderer->AddActor(actor);
+  vtkPiecewiseFunction* opacityFunc = vtkPiecewiseFunction::New();
+  opacityFunc->AddSegment(0.0, 0.0, 255.0, 0.0);
+  opacityFunc->AddSegment(1000.0, 0.0, 20000.0, 1.0);
+
+  m_property = vtkVolumeProperty::New();
+  m_property->SetColor(colorFunc);
+  m_property->SetScalarOpacity(opacityFunc);
+  m_property->SetInterpolationTypeToLinear();
+  m_property->SetIndependentComponents(true);
+
+  m_volume = vtkVolume::New();
+  m_volume->SetMapper(m_mapper);
+  m_volume->SetProperty(m_property);
 
   // Set render background.
   m_renderer->GradientBackgroundOn();
-  m_renderer->SetBackground(0.7, 0.7, 0.7);
-  m_renderer->SetBackground2(0.2, 0.2, 0.2);
+  m_renderer->SetBackground(0.2, 0.2, 0.2);
+  m_renderer->SetBackground2(0.0, 0.0, 0.0);
+  m_renderer->AddVolume(m_volume);
+  m_renderer->ResetCamera();
   m_renderer->Render();
 }
 
@@ -203,12 +206,14 @@ void Loader::UpdateView() {
   m_converter->SetInput(m_reader->GetOutput());
   m_converter->Update();
 
-  m_surface->SetInputData(m_converter->GetOutput());
+  m_mapper->SetInputData(m_converter->GetOutput());
   m_mapper->Update();
 
   for (int i = 0; i < 3; i++) {
     m_planes[i]->SetInputData(m_converter->GetOutput());
     m_planes[i]->UpdatePlacement();
   }
+
   m_renderer->ResetCamera();
+  m_view->GetRenderWindow()->Render();
 }

@@ -8,7 +8,7 @@ Quantifier::Quantifier() : Stage() {
 
   // VTK rendering elements.
   m_imageView = vtkImageViewer2::New();
-  m_3Dmode = true;
+  m_3Dmode = false;
 
   BuildToolbox();
   BuildContent();

@@ -11,12 +11,16 @@
 #include <QPushButton>
 #include <QAbstractState>
 #include <QFontMetrics>
+#include <QSlider>
 #include <QVTKWidget.h>
 #include <QFileDialog>
+
 #include <string>
+#include <limits>
 
 #include "itkImage.h"
 #include "itkImageToVTKImageFilter.h"
+#include "itkBinaryThresholdImageFilter.h"
 #include "itkSubtractImageFilter.h"
 
 #include <vtkRenderer.h>
@@ -55,19 +59,28 @@ namespace vis {
       typedef itk::SubtractImageFilter<
         BaseImage, BaseImage, BaseImage
       > SubtractFilter;
+      typedef itk::BinaryThresholdImageFilter<
+        BaseImage, BaseImage
+      > ThresholdFilter;
+      typedef itk::ImageToVTKImageFilter<BaseImage> Converter;
 
     private:
-      SubtractFilter::Pointer m_subtractFilter;
+      SubtractFilter::Pointer m_subtract;
+      Converter::Pointer m_converter;
+      ThresholdFilter::Pointer m_threshold;
+
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
-      vtkImageViewer2* m_imageView;
+      vtkImagePlaneWidget* m_plane;
       vtkRenderWindowInteractor* m_interactor;
 
       QWidget* m_toolBox;
       QVTKWidget* m_view;
 
-      QLabel* m_UIDLabel;
-      QLabel* m_slicesLabel;
+      QLabel* m_minLabel;
+      QLabel* m_maxLabel;
+      QSlider* m_minSlider;
+      QSlider* m_maxSlider;
 
       void BuildToolbox();
       void BuildContent();
@@ -79,6 +92,9 @@ namespace vis {
 
       QWidget* GetContent();
       QWidget* GetToolbox();
+
+    signals:
+      void SegmentationComplete(BaseImage::Pointer);
 
     public slots:
 	    void SetFixedImage(BaseImage::Pointer);

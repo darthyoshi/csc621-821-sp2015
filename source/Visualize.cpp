@@ -25,13 +25,17 @@ Visualize::Visualize(QWidget* parent) : QMainWindow(parent),
   int m_segmentIdx = toolbox->addItem(m_segmentor->GetToolbox(), tr("Segment"));
   stack->addWidget(m_segmentor->GetContent());
 
+  /*
   m_quantifier = new Quantifier();
   int m_quantifyIdx = toolbox->addItem(m_quantifier->GetToolbox(), tr("Quantify"));
   stack->addWidget(m_quantifier->GetContent());
+  */
 
   toolbox->setItemEnabled(m_registerIdx, false);
   toolbox->setItemEnabled(m_segmentIdx, false);
+  /*
   toolbox->setItemEnabled(m_quantifyIdx, false);
+  */
 
   this->showMaximized();
 
@@ -43,15 +47,12 @@ Visualize::Visualize(QWidget* parent) : QMainWindow(parent),
   // stage.
   connect(m_loader, &Loader::SourceChanged, m_registrant, &Registrant::SetFixedSource);
   connect(m_loader, &Loader::SourceChanged, m_segmentor, &Segmentor::SetFixedImage);
-  connect(m_loader, &Loader::SourceChanged, m_quantifier, &Quantifier::UpdateImage);
+  //connect(m_loader, &Loader::SourceChanged, m_quantifier, &Quantifier::UpdateImage);
   connect(m_registrant, &Registrant::RegistrationComplete, m_segmentor, &Segmentor::SetMovingImage);
 
   // Enable appropriate stages when their inputs have become available.
   connect(m_loader, &Loader::SourceChanged, [=](BaseImage::Pointer b) {
       toolbox->setItemEnabled(m_registerIdx, true);
-  });
-  connect(m_loader, &Loader::SourceChanged, [=](BaseImage::Pointer b) {
-      toolbox->setItemEnabled(m_quantifyIdx, true);
   });
   connect(m_registrant, &Registrant::RegistrationComplete, [=](BaseImage::Pointer) {
       toolbox->setItemEnabled(m_segmentIdx, true);

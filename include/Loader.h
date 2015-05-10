@@ -28,6 +28,7 @@
 #include <vtkResliceCursorActor.h>
 #include <vtkResliceCursorThickLineRepresentation.h>
 #include <vtkImageMarchingCubes.h>
+#include <vtkSmartVolumeMapper.h>
 #include <vtkResliceCursorWidget.h>
 #include <vtkResliceCursorLineRepresentation.h>
 #include <vtkImagePlaneWidget.h>
@@ -36,6 +37,7 @@
 #include <vtkCellPicker.h>
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkProperty.h>
+#include <vtkVolumeProperty.h>
 #include <vtkResliceCursorPolyDataAlgorithm.h>
 #include <vtkSmartPointer.h>
 
@@ -78,8 +80,9 @@ namespace vis {
       vtkRenderWindow* m_renderWindow;
       vtkRenderWindowInteractor* m_interactor;
       vtkImagePlaneWidget* m_planes[3];
-      vtkImageMarchingCubes* m_surface;
-      vtkPolyDataMapper* m_mapper;
+      vtkSmartVolumeMapper* m_mapper;
+      vtkVolumeProperty* m_property;
+      vtkVolume* m_volume;
       Converter::Pointer m_converter;
 
       QWidget* m_toolBox;
