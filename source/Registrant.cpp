@@ -225,7 +225,7 @@ void Registrant::Register() {
   typedef Optimizer::ScalesType Scales;
   Scales scales(m_transform->GetNumberOfParameters());
   
-  double data[6] = { 1/50.0,  1/50.0,  1/50.0f, 10.0, 10.0, 10.0 };
+  double data[6] = { 1/50.0,  1/50.0,  1/50.0, 10.0, 10.0, 10.0 };
   scales.SetData(data, 6, false);
   m_optimizer->SetScales(scales);
 
@@ -280,6 +280,9 @@ void Registrant::Register() {
   CLOG(INFO, "register") << "Iterations = " << iterations;
   CLOG(INFO, "register") << "Metric value = " << bestValue;
 
+  m_optimizerLabel->setText(tr("Finalizing"));
+  m_optimizerLabel->repaint();
+
   m_finalTransform->SetCenter(m_transform->GetCenter());
   m_finalTransform->SetParameters(finalParameters);
   m_finalTransform->SetFixedParameters(m_transform->GetFixedParameters());
@@ -294,7 +297,7 @@ void Registrant::Register() {
 
   // rescale registered moving input to fixed input intensity
   m_histmatch->ThresholdAtMeanIntensityOn();
-  m_histmatch->SetNumberOfHistogramLevels(1024);
+  m_histmatch->SetNumberOfHistogramLevels(m_histogramBins);
   m_histmatch->SetNumberOfMatchPoints(m_histogramSamples);
   m_histmatch->Update();
 
@@ -302,6 +305,8 @@ void Registrant::Register() {
   // output.
   UpdateView();
   emit RegistrationComplete(m_histmatch->GetOutput());
+  m_optimizerLabel->setText(tr("-"));
+  m_optimizerLabel->repaint();
   m_runButton->setDisabled(false);
 }
 
