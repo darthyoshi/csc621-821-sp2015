@@ -41,6 +41,8 @@ using namespace vis;
 
 Loader::Loader() : Stage() {
   m_reader = Reader::New();
+  m_gdcmIO = ImageIOType::New();
+  m_namesGenerator = NamesGeneratorType::New();
   m_converter = Converter::New();
   m_converter->SetInput(m_reader->GetOutput());
 
@@ -157,17 +159,11 @@ void Loader::BuildContent() {
 void Loader::LoadDICOMSource() {
 
   QDir dir = QFileDialog::getExistingDirectory(0, "Select Folder: ");
-  QFileInfoList list = dir.entryInfoList(QDir::Dirs | QDir::Files | 
-      QDir::NoDotAndDotDot);
 
-  std::vector<std::string> names;
-  foreach (QFileInfo finfo, list) {
-    std::string str = dir.path().toStdString().c_str();
-    str.append("/");
-
-    names.push_back(str + finfo.fileName().toStdString().c_str());
-  }
-  m_reader->SetFileNames(names);
+  // generate file names using metadata to order correctly
+  m_namesGenerator->SetInputDirectory( dir.path().toStdString().c_str() );
+  m_reader->SetImageIO( m_gdcmIO );
+  m_reader->SetFileNames( m_namesGenerator->GetInputFileNames() );
 
   try {
     m_reader->Update();
