@@ -17,6 +17,8 @@
 
 #include "itkImage.h"
 #include "itkImageSeriesReader.h"
+#include "itkGDCMImageIO.h"
+#include "itkGDCMSeriesFileNames.h"
 #include "itkImageToVTKImageFilter.h"
 
 #include <vtkRenderer.h>
@@ -52,6 +54,8 @@ namespace vis {
 
     protected:
       typedef itk::ImageSeriesReader<BaseImage> Reader;
+      typedef itk::GDCMImageIO                  ImageIOType;
+      typedef itk::GDCMSeriesFileNames          NamesGeneratorType;
       typedef itk::ImageToVTKImageFilter<BaseImage> Converter;
 
     public:
@@ -74,6 +78,8 @@ namespace vis {
 
     private:
       Reader::Pointer m_reader;
+      ImageIOType::Pointer m_gdcmIO;
+      NamesGeneratorType::Pointer m_namesGenerator;
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
       vtkRenderWindowInteractor* m_interactor;

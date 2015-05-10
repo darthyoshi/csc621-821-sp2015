@@ -298,7 +298,7 @@ void Registrant::Register() {
 
   // rescale registered moving input to fixed input intensity
   m_histmatch->ThresholdAtMeanIntensityOn();
-  m_histmatch->SetNumberOfHistogramLevels(m_histogramBins);
+  m_histmatch->SetNumberOfHistogramLevels(1024);
   m_histmatch->SetNumberOfMatchPoints(m_histogramSamples);
   m_histmatch->Update();
 
