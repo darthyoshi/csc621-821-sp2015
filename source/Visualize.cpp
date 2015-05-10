@@ -2,7 +2,7 @@
 
 using namespace vis;
 
-Visualize::Visualize(QWidget* parent = 0) : QMainWindow(parent),
+Visualize::Visualize(QWidget* parent) : QMainWindow(parent),
   m_window(new Ui::MainWindow())
 {
   m_window->setupUi(this);
@@ -35,15 +35,29 @@ Visualize::Visualize(QWidget* parent = 0) : QMainWindow(parent),
 
   this->showMaximized();
 
+  // Connect sidebar toolbox to display the correct content widget when it is
+  // selected.
   connect(toolbox, &QToolBox::currentChanged, stack, &QStackedWidget::setCurrentIndex);
+
+  // Connect each stage signal to the appropriate slots on every concerned
+  // stage.
   connect(m_loader, &Loader::SourceChanged, m_registrant, &Registrant::SetFixedSource);
+  connect(m_loader, &Loader::SourceChanged, m_segmentor, &Segmentor::SetFixedImage);
+  connect(m_loader, &Loader::SourceChanged, m_quantifier, &Quantifier::UpdateImage);
+  connect(m_registrant, &Registrant::RegistrationComplete, m_segmentor, &Segmentor::SetMovingImage);
+
+  // Enable appropriate stages when their inputs have become available.
   connect(m_loader, &Loader::SourceChanged, [=](BaseImage::Pointer b) {
       toolbox->setItemEnabled(m_registerIdx, true);
   });
-  connect(m_loader, &Loader::SourceChanged, m_quantifier, &Quantifier::UpdateImage);
   connect(m_loader, &Loader::SourceChanged, [=](BaseImage::Pointer b) {
       toolbox->setItemEnabled(m_quantifyIdx, true);
   });
+  connect(m_registrant, &Registrant::RegistrationComplete, [=](BaseImage::Pointer) {
+      toolbox->setItemEnabled(m_segmentIdx, true);
+  });
+
+  // Connect the window's exit action with a proper cleanup.
   connect(m_window->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
