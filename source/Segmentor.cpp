@@ -5,16 +5,25 @@ using namespace vis;
 Segmentor::Segmentor() : Stage() {
   // Initialize ITK pipeline objects.
   m_subtract = SubtractFilter::New();
+  m_erode  = ErodeFilter::New();
+  m_dilate = DilateFilter::New();
   m_converter = Converter::New();
+
+  m_structuringElement = StructuringElement();
+  
+  m_erode->SetErodeValue( std::numeric_limits<signed short>::max() );
+  m_dilate->SetDilateValue( std::numeric_limits<signed short>::max() );
 
   m_threshold = ThresholdFilter::New(); 
   m_threshold->SetOutsideValue(std::numeric_limits<signed short>::min());
   m_threshold->SetInsideValue(std::numeric_limits<signed short>::max());
   m_threshold->SetInput(m_subtract->GetOutput());
-  m_converter->SetInput(m_threshold->GetOutput());
   
   // Initialize VTK pipeline and view objects.
   m_plane = vtkImagePlaneWidget::New();
+
+  m_openingRadius = 0;
+  m_resetView = true;
 
   BuildToolbox();
   BuildContent();
@@ -30,10 +39,12 @@ QWidget* Segmentor::GetContent() {
 
 void Segmentor::SetFixedImage(BaseImage::Pointer fixedImage){
   m_subtract->SetInput1(fixedImage);
+  m_resetView = true;
 }
 
 void Segmentor::SetMovingImage(BaseImage::Pointer movingImage){
   m_subtract->SetInput2(movingImage);
+  m_resetView = true;
   Segment();
 }
 
@@ -62,6 +73,15 @@ void Segmentor::BuildToolbox() {
       (int)std::numeric_limits<signed short>::max());
   m_maxSlider->setOrientation(Qt::Orientation::Horizontal);
 
+  QHBoxLayout* openingHeader = new QHBoxLayout();
+  QLabel* openingSliderLabel = new QLabel(tr("<b>Opening Amount</b>"));
+  m_openingLabel = new QLabel(tr("-"));
+  openingHeader->addWidget(openingSliderLabel);
+  openingHeader->addWidget(m_openingLabel);
+  m_openingSlider = new QSlider();
+  m_openingSlider->setRange(0,5);
+  m_openingSlider->setOrientation(Qt::Orientation::Horizontal);
+
   connect(m_minSlider, &QSlider::valueChanged, [=](int value) {
       auto upperThreshold = m_threshold->GetUpperThreshold();
       if (value > m_threshold->GetUpperThreshold()) {
@@ -69,7 +89,7 @@ void Segmentor::BuildToolbox() {
         m_minSlider->setValue((int)upperThreshold);
       } else {
         m_threshold->SetLowerThreshold((BasePixel)value);
-        UpdateView();
+        Segment();
       }
 
       auto newMin = m_threshold->GetLowerThreshold();
@@ -82,25 +102,50 @@ void Segmentor::BuildToolbox() {
         m_maxSlider->setValue((int)lowerThreshold);
       } else {
         m_threshold->SetUpperThreshold((BasePixel)value);
-        UpdateView();
+        Segment();
       }
 
       auto newMax = m_threshold->GetUpperThreshold();
       m_maxLabel->setText(tr(std::to_string(newMax).c_str()));
   });
 
+  connect(m_openingSlider, &QSlider::valueChanged, [=](int value) {
+      m_openingRadius = value;
+      Segment();
+
+      m_openingLabel->setText(tr(std::to_string(value).c_str()));
+  });
+
   pageLayout->addLayout(minHeader);
   pageLayout->addWidget(m_minSlider);
   pageLayout->addLayout(maxHeader);
   pageLayout->addWidget(m_maxSlider);
+  pageLayout->addLayout(openingHeader);
+  pageLayout->addWidget(m_openingSlider);
 
   m_toolBox->setLayout(pageLayout);
 }
 
 // Run the actual segmentation process here.
 void Segmentor::Segment() {
-  m_subtract->Update();
-  emit SegmentationComplete(m_subtract->GetOutput());
+  if (m_openingRadius > 0) {
+    m_structuringElement.SetRadius( m_openingRadius );
+    m_structuringElement.CreateStructuringElement();
+    m_erode->SetKernel(  m_structuringElement );
+    m_dilate->SetKernel( m_structuringElement );
+
+    m_erode->SetInput(m_threshold->GetOutput());
+    m_dilate->SetInput(m_erode->GetOutput());
+
+    m_dilate->Update();
+    m_converter->SetInput(m_dilate->GetOutput());
+    emit SegmentationComplete(m_dilate->GetOutput());
+  } else {
+    m_threshold->Update();
+    m_converter->SetInput(m_threshold->GetOutput());
+    emit SegmentationComplete(m_threshold->GetOutput());
+  }
+  
   UpdateView();
 }
 
@@ -144,10 +189,21 @@ void Segmentor::BuildContent() {
 }
 
 void Segmentor::UpdateView() {
-  m_threshold->Update();
-  m_converter->SetInput(m_threshold->GetOutput());
+  int curr_slice = m_plane->GetSliceIndex();
   m_converter->Update();
 
   m_plane->SetInputData(m_converter->GetOutput());
+  if (m_resetView) {
+    m_plane->SetSliceIndex((int)(m_converter->GetOutput()->GetDimensions()[0] / 2.0));
+  } else {
+    m_plane->SetSliceIndex(curr_slice);
+  }
+
+  m_plane->UpdatePlacement();
+
+  if (m_resetView) {
+    m_renderer->ResetCamera();
+    m_resetView = false;
+  }
   m_view->GetRenderWindow()->Render();
 }
