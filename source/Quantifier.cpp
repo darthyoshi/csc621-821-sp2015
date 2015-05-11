@@ -5,6 +5,9 @@ using namespace vis;
 Quantifier::Quantifier() : Stage() {
   // ITK pipeline elements.
   m_converter = Converter::New();
+  m_connector = BlobDetector::New();
+  m_relabel = RelabelFilter::New();
+  m_rgbFilter = RGBFilter::New();
 
   // VTK rendering elements.
   m_imageView = vtkImageViewer2::New();
@@ -29,22 +32,48 @@ void Quantifier::BuildToolbox() {
   // Details
   QGridLayout* details = new QGridLayout();
   QLabel* nameLabel = new QLabel(tr("Current Mode"));
-  QLabel* slicesLabel = new QLabel(tr("<b>Slice:</b>"));
+  QLabel* thresholdLabel = new QLabel(tr("<b>Distance Threshold</b>"));
+  QLabel* sizeLabel = new QLabel(tr("<b>Minimum Size</b>"));
 
   m_modeLabel = new QLabel(tr(m_labels[0].c_str()));
   m_modeLabel->setAlignment(Qt::AlignRight);
-  m_slicesLabel = new QLabel(tr("-"));
-  m_slicesLabel->setAlignment(Qt::AlignRight);
+
+  m_sliceLabel = new QLabel(tr("<b>Slice:</b>"));
+  m_sliceValueLabel = new QLabel(tr("0"));
+  m_sliceValueLabel->setAlignment(Qt::AlignRight);
+
+  m_sizeLabel = new QLabel(tr("4"));
+  m_sizeLabel->setAlignment(Qt::AlignRight);
+
+  m_thresholdLabel = new QLabel(tr("4"));
+  m_thresholdLabel->setAlignment(Qt::AlignRight);
 
   m_sliceSlider = new QSlider();
   m_sliceSlider->hide();
   m_sliceSlider->setTracking(true);
 
+  m_thresholdSlider = new QSlider();
+  m_thresholdSlider->setTracking(false);
+  m_thresholdSlider->setValue(4);
+
+  m_sizeSlider = new QSlider();
+  m_sizeSlider->setTracking(false);
+  m_sizeSlider->setValue(4);
+
   details->addWidget(m_modeLabel, 1, 1);
   details->addWidget(nameLabel, 1, 0);
-  details->addWidget(slicesLabel, 2, 0);
-  details->addWidget(m_slicesLabel, 2, 1);
-  details->addWidget(m_sliceSlider, 3, 1);
+
+  details->addWidget(sizeLabel, 2, 0);
+  details->addWidget(m_sizeLabel, 2, 1);
+  details->addWidget(m_sizeSlider, 3, 1);
+
+  details->addWidget(thresholdLabel, 4, 0);
+  details->addWidget(m_thresholdLabel, 4, 1);
+  details->addWidget(m_thresholdSlider, 5, 1);
+
+  details->addWidget(m_sliceLabel, 6, 0);
+  details->addWidget(m_sliceValueLabel, 6, 1);
+  details->addWidget(m_sliceSlider, 7, 1);
 
   layout->addWidget(toggleButton);
   layout->addItem(details);
@@ -54,7 +83,9 @@ void Quantifier::BuildToolbox() {
   m_toolBox->setLayout(pageLayout);
 
   connect(toggleButton, SIGNAL(clicked()), this, SLOT(ToggleMode()));
-  connect(m_sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(UpdateSlices()));
+  connect(m_sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(UpdateSlice()));
+  connect(m_sizeSlider, SIGNAL(valueChanged(int)), this, SLOT(UpdateSize()));
+  connect(m_thresholdSlider, SIGNAL(valueChanged(int)), this, SLOT(UpdateThreshold()));
 }
 
 void Quantifier::BuildContent() {
@@ -81,18 +112,28 @@ void Quantifier::BuildContent() {
   //TODO: render MIP
 }
 
-void Quantifier::UpdateImage(BaseImage::Pointer image) {
-  m_converter->SetInput(image);
+void Quantifier::SetImage(BaseImage::Pointer image) {
+  //set up blob detector
+  m_connector->SetInput(image);
+  m_connector->SetDistanceThreshold(4);
+
+  //set up relabeler
+  m_relabel->SetInput(m_connector->GetOutput());
+  m_relabel->SetMinimumObjectSize(4);
+
+  //set up rgb filter
+  m_rgbFilter->SetInput(m_relabel->GetOutput());
+
+  //convert to ITK image to VTK image
+  m_converter->SetInput(m_rgbFilter->GetOutput());
   m_converter->Update();
 
-  //TODO: needs to accept blob image if available
+  //set up cine-view
   m_imageView->SetInputData(m_converter->GetOutput());
-
-  m_slicesLabel->setText(QString::number(m_currentSlice));
-
-  m_sliceSlider->setMinimum(m_imageView->GetSliceMin());
+  int currentSlice = m_imageView->GetSliceMin();
+  m_sliceSlider->setMinimum(currentSlice);
   m_sliceSlider->setMaximum(m_imageView->GetSliceMax());
-  m_currentSlice = m_imageView->GetSliceMin();
+  m_sliceValueLabel->setText(QString::number(currentSlice));
 }
 
 QWidget* Quantifier::GetContent() {
@@ -103,13 +144,13 @@ QWidget* Quantifier::GetToolbox() {
   return m_toolBox;
 }
 
-void Quantifier::UpdateSlices() {
+void Quantifier::UpdateSlice() {
   //update cine-view slice
-  m_currentSlice = m_sliceSlider->value();
+  int currentSlice = m_sliceSlider->value();
 
-  m_slicesLabel->setText(QString::number(m_currentSlice));
+  m_sliceValueLabel->setText(QString::number(currentSlice));
 
-  m_imageView->SetSlice(m_currentSlice);
+  m_imageView->SetSlice(currentSlice);
   m_imageView->Render();
 }
 
@@ -121,11 +162,15 @@ void Quantifier::ToggleMode() {
 
   if(m_3Dmode) {
     m_sliceSlider->hide();
+    m_sliceLabel->hide();
+    m_sliceValueLabel->hide();
     label = &m_labels[0];
   }
 
   else {
     m_sliceSlider->show();
+    m_sliceLabel->show();
+    m_sliceValueLabel->show();
     label = &m_labels[1];
   }
   m_modeLabel->setText(QString::fromStdString(*label));
@@ -136,4 +181,26 @@ void Quantifier::ToggleMode() {
   m_imageView->Render();
 
   //TODO: toggle MIP
+}
+
+void Quantifier::UpdateThreshold() {
+  short threshold = (short)(m_thresholdSlider->value());
+
+  m_connector->SetDistanceThreshold(threshold);
+
+  m_relabel->Update();
+  m_imageView->Render();
+
+  m_thresholdLabel->setText(QString::number(threshold));
+}
+
+void Quantifier::UpdateSize() {
+  int minSize = m_sizeSlider->value();
+
+  m_relabel->SetMinimumObjectSize(minSize);
+
+  m_relabel->Update();
+  m_imageView->Render();
+
+  m_sizeLabel->setText(QString::number(minSize));
 }
