@@ -56,8 +56,8 @@ namespace vis {
 
     protected:
       typedef itk::ImageSeriesReader<BaseImage> Reader;
-      typedef itk::GDCMImageIO                  ImageIOType;
-      typedef itk::GDCMSeriesFileNames          NamesGeneratorType;
+      typedef itk::GDCMImageIO ImageIO;
+      typedef itk::GDCMSeriesFileNames NamesGenerator;
       typedef itk::ImageToVTKImageFilter<BaseImage> Converter;
 
     public:
@@ -80,8 +80,8 @@ namespace vis {
 
     private:
       Reader::Pointer m_reader;
-      ImageIOType::Pointer m_gdcmIO;
-      NamesGeneratorType::Pointer m_namesGenerator;
+      ImageIO::Pointer m_gdcmIO;
+      NamesGenerator::Pointer m_namesGenerator;
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
       vtkRenderWindowInteractor* m_interactor;

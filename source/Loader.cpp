@@ -41,8 +41,8 @@ using namespace vis;
 
 Loader::Loader() : Stage() {
   m_reader = Reader::New();
-  m_gdcmIO = ImageIOType::New();
-  m_namesGenerator = NamesGeneratorType::New();
+  m_gdcmIO = ImageIO::New();
+  m_namesGenerator = NamesGenerator::New();
   m_converter = Converter::New();
   m_converter->SetInput(m_reader->GetOutput());
 
