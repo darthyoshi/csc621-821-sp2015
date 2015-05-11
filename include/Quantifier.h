@@ -74,6 +74,9 @@ namespace vis {
       // used to connect ITK pipeline to VTK
       typedef itk::ImageToVTKImageFilter<itk::Image<RGBPixelType, 3>> Converter;
 
+      // used to create image statistics
+      typedef itk::LabelStatisticsImageFilter< BaseImage, LabelImage > LabelStatistics;
+
     public:
       Quantifier();
 
@@ -91,11 +94,14 @@ namespace vis {
       void BuildToolbox();
       void BuildContent();
 
+      LabelStatistics::Pointer Quantifier::GetStatistics();
+
     private:
       vtkRenderer* m_renderer;
       vtkRenderWindowInteractor* m_interactor;
       vtkImageViewer2* m_imageView;
       Converter::Pointer m_converter;
+      LabelStatistics::Pointer m_statistics;
 
       QWidget* m_toolBox;
       QVTKWidget* m_view;

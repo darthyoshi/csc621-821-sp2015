@@ -8,6 +8,7 @@ Quantifier::Quantifier() : Stage() {
   m_connector = BlobDetector::New();
   m_relabel = RelabelFilter::New();
   m_rgbFilter = RGBFilter::New();
+  m_statistics = LabelStatistics::New();
 
   // VTK rendering elements.
   m_imageView = vtkImageViewer2::New();
@@ -128,6 +129,11 @@ void Quantifier::SetImage(BaseImage::Pointer image) {
   m_converter->SetInput(m_rgbFilter->GetOutput());
   m_converter->Update();
 
+  //create statistics for image blobs
+  m_statistics->SetLabelInput(m_relabel->GetOutput());
+  m_statistics->SetInput(image);
+  m_statistics->UseHistogramsOn(); // needed to compute median
+
   //set up cine-view
   m_imageView->SetInputData(m_converter->GetOutput());
   int currentSlice = m_imageView->GetSliceMin();
@@ -203,4 +209,10 @@ void Quantifier::UpdateSize() {
   m_imageView->Render();
 
   m_sizeLabel->setText(QString::number(minSize));
+}
+
+Quantifier::LabelStatistics::Pointer Quantifier::GetStatistics() {
+  m_statistics->Update();
+
+  return m_statistics;
 }
