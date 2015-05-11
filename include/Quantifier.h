@@ -43,6 +43,7 @@
 #include <vtkProperty.h>
 #include <vtkResliceCursorPolyDataAlgorithm.h>
 #include <vtkSmartPointer.h>
+#include <vtkCamera.h>
 
 #include "easylogging++.h"
 
@@ -89,6 +90,7 @@ namespace vis {
       void UpdateSlice();
       void UpdateThreshold();
       void UpdateSize();
+      void ResetCamera();
 
     protected:
       void BuildToolbox();
