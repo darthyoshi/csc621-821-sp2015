@@ -22,6 +22,9 @@
 #include "itkImageToVTKImageFilter.h"
 #include "itkBinaryThresholdImageFilter.h"
 #include "itkSubtractImageFilter.h"
+#include "itkBinaryErodeImageFilter.h"
+#include "itkBinaryDilateImageFilter.h"
+#include "itkBinaryBallStructuringElement.h"
 
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
@@ -62,12 +65,24 @@ namespace vis {
       typedef itk::BinaryThresholdImageFilter<
         BaseImage, BaseImage
       > ThresholdFilter;
+      typedef itk::BinaryBallStructuringElement<
+        BasePixel, 3
+      > StructuringElement;
+      typedef itk::BinaryErodeImageFilter<
+        BaseImage, BaseImage, StructuringElement 
+      >  ErodeFilter;
+      typedef itk::BinaryDilateImageFilter<
+        BaseImage, BaseImage, StructuringElement 
+      >  DilateFilter;
       typedef itk::ImageToVTKImageFilter<BaseImage> Converter;
 
     private:
       SubtractFilter::Pointer m_subtract;
       Converter::Pointer m_converter;
       ThresholdFilter::Pointer m_threshold;
+      ErodeFilter::Pointer  m_erode;
+      DilateFilter::Pointer m_dilate;
+      StructuringElement m_structuringElement;
 
       vtkRenderer* m_renderer;
       vtkRenderWindow* m_renderWindow;
@@ -79,10 +94,14 @@ namespace vis {
 
       QLabel* m_minLabel;
       QLabel* m_maxLabel;
+      QLabel* m_openingLabel;
       QSlider* m_minSlider;
       QSlider* m_maxSlider;
+      QSlider* m_openingSlider;
 
-      bool m_firstUpdateView;
+      int m_openingRadius;
+
+      bool m_resetView;
 
       void BuildToolbox();
       void BuildContent();
