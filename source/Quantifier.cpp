@@ -12,6 +12,12 @@ Quantifier::Quantifier() : Stage() {
 
   // VTK rendering elements.
   m_imageView = vtkImageViewer2::New();
+  m_pieceWise = vtkPiecewiseFunction::New();
+  m_colorTransfer = vtkColorTransferFunction::New();
+  m_volumeProperty = vtkVolumeProperty::New();
+  m_rayMapper = vtkFixedPointVolumeRayCastMapper::New();
+  m_volume = vtkVolume::New();
+
   m_3Dmode = true;
 
   BuildToolbox();
@@ -102,16 +108,39 @@ void Quantifier::BuildContent() {
   m_imageView->SetRenderer(m_renderer);
   m_imageView->GetImageActor()->SetVisibility(!m_3Dmode);
 
+  //render MIP
+  m_pieceWise->AddSegment(0, 1.0, 256, 0.1);
+
+  m_pieceWise->AddPoint(0.0, 0.0);
+  m_pieceWise->AddPoint(80.0, 1.0);
+  m_pieceWise->AddPoint(80.1, 0.0);
+  m_pieceWise->AddPoint(255.0, 0.0);
+
+  m_colorTransfer->AddRGBPoint(0.0, 0.0, 0.0, 1.0);
+  m_colorTransfer->AddRGBPoint(80.0, 1.0, 0.0, 0.0);
+  m_colorTransfer->AddRGBPoint(255.0, 1.0, 1.0, 1.0);
+
+  m_volumeProperty->SetScalarOpacity(m_pieceWise);
+  m_volumeProperty->SetColor(m_colorTransfer);
+  m_volumeProperty->SetInterpolationTypeToLinear();
+
+  m_rayMapper->SetBlendModeToMaximumIntensity();
+
+  m_volume->SetMapper(m_rayMapper);
+  m_volume->SetProperty(m_volumeProperty);
+
+  m_renderer->AddViewProp(m_volume);
+
   // Set render background.
   m_renderer->GradientBackgroundOn();
-  m_renderer->SetBackground(0.7, 0.7, 0.7);
-  m_renderer->SetBackground2(0.2, 0.2, 0.2);
+  m_renderer->SetBackground(0.2, 0.2, 0.2);
+  m_renderer->SetBackground2(0.0, 0.0, 0.0);
   m_renderer->Render();
-
-  //TODO: render MIP
 }
 
 void Quantifier::SetImage(BaseImage::Pointer image) {
+  //TODO: is there a more efficient way to do this pipeline?
+
   //set up blob detector
   m_connector->SetInput(image);
   m_connector->SetDistanceThreshold(4);
@@ -123,14 +152,14 @@ void Quantifier::SetImage(BaseImage::Pointer image) {
   //set up rgb filter
   m_rgbFilter->SetInput(m_relabel->GetOutput());
 
-  //convert to ITK image to VTK image
-  m_converter->SetInput(m_rgbFilter->GetOutput());
-  m_converter->Update();
-
   //create statistics for image blobs
   m_statistics->SetLabelInput(m_relabel->GetOutput());
   m_statistics->SetInput(image);
   m_statistics->UseHistogramsOn(); // needed to compute median
+
+  //convert to ITK image to VTK image
+  m_converter->SetInput(m_rgbFilter->GetOutput());
+  m_converter->Update();
 
   //set up cine-view
   m_imageView->SetInputData(m_converter->GetOutput());
@@ -138,6 +167,11 @@ void Quantifier::SetImage(BaseImage::Pointer image) {
   m_sliceSlider->setMinimum(currentSlice);
   m_sliceSlider->setMaximum(m_imageView->GetSliceMax());
   m_sliceValueLabel->setText(QString::number(currentSlice));
+
+  //set up MIP
+  m_rayMapper->SetInputData(m_converter->GetOutput());
+
+  m_renderer->ResetCamera();
 }
 
 QWidget* Quantifier::GetContent() {
@@ -162,7 +196,7 @@ void Quantifier::UpdateSlice() {
 void Quantifier::ToggleMode() {
   m_3Dmode = !m_3Dmode;
 
-  //TODO: sidebar needs to be updated when changing modes
+  //TODO: need to toggle MIP elements
   std::string* label;
 
   if(m_3Dmode) {
@@ -183,12 +217,13 @@ void Quantifier::ToggleMode() {
   }
   m_modeLabel->setText(QString::fromStdString(*label));
 
-  //toggle cine-view
+  //switch between cine-view and MIP
   m_imageView->GetImageActor()->SetVisibility(!m_3Dmode);
+  m_volume->SetVisibility(m_3Dmode);
+
   m_renderer->ResetCamera();
   m_imageView->Render();
-
-  //TODO: toggle MIP
+  m_renderer->Render();
 }
 
 void Quantifier::UpdateThreshold() {
@@ -223,6 +258,8 @@ void Quantifier::ResetCamera() {
   m_renderer->GetActiveCamera()->SetViewUp(0,1,0);
   m_renderer->GetActiveCamera()->SetPosition(0,0,1);
   m_renderer->GetActiveCamera()->SetFocalPoint(0,0,0);
+
   m_renderer->ResetCamera();
   m_imageView->Render();
+  m_renderer->Render();
 }

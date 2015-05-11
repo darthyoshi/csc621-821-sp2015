@@ -44,6 +44,10 @@
 #include <vtkResliceCursorPolyDataAlgorithm.h>
 #include <vtkSmartPointer.h>
 #include <vtkCamera.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkFixedPointVolumeRayCastMapper.h>
+#include <vtkVolumeProperty.h>
 
 #include "easylogging++.h"
 
@@ -99,12 +103,14 @@ namespace vis {
       LabelStatistics::Pointer Quantifier::GetStatistics();
 
     private:
+      bool m_3Dmode;
+
+      //ITK/VTK base
       vtkRenderer* m_renderer;
       vtkRenderWindowInteractor* m_interactor;
-      vtkImageViewer2* m_imageView;
       Converter::Pointer m_converter;
-      LabelStatistics::Pointer m_statistics;
 
+      //UI
       QWidget* m_toolBox;
       QVTKWidget* m_view;
 
@@ -118,12 +124,21 @@ namespace vis {
       QSlider* m_thresholdSlider;
       QSlider* m_sizeSlider;
 
-      bool m_3Dmode;
+      //cine-view
+      vtkImageViewer2* m_imageView;
 
-      //filters
+      //blob detection
       BlobDetector::Pointer m_connector;
       RelabelFilter::Pointer m_relabel;
       RGBFilter::Pointer m_rgbFilter;
+      LabelStatistics::Pointer m_statistics;
+
+      //MIP
+      vtkPiecewiseFunction* m_pieceWise;
+      vtkColorTransferFunction* m_colorTransfer;
+      vtkVolumeProperty* m_volumeProperty;
+      vtkFixedPointVolumeRayCastMapper* m_rayMapper;
+      vtkVolume* m_volume;
 
       const std::string m_labels[2] = {"MIP","Cine-View"};
   };
