@@ -3,6 +3,7 @@
 
 #include "itkImage.h"
 #include "itkRGBPixel.h"
+#include "itkRGBAPixel.h"
 
 namespace vis {
   /**
@@ -15,7 +16,7 @@ namespace vis {
   typedef itk::RGBPixel<unsigned char> ColorPixel;
   typedef itk::Image<ColorPixel, 3> ColorImage;
 
-  typedef unsigned int LabelPixel;
+  typedef unsigned char LabelPixel;
   typedef itk::Image<LabelPixel, 3> LabelImage;
 }
 

@@ -16,24 +16,34 @@
 #include <string>
 
 #include "itkImage.h"
+#include "itkImageSource.h"
+#include "itkImageRegion.h"
 #include "itkImageSeriesReader.h"
+#include "itkDefaultConvertPixelTraits.h"
+#include "itkConvertPixelBuffer.h"
 #include "itkImageToVTKImageFilter.h"
 #include "itkLabelToRGBImageFilter.h"
+#include "itkCastImageFilter.h"
 #include "itkRelabelComponentImageFilter.h"
+#include "itkMersenneTwisterRandomVariateGenerator.h"
 #include "itkLabelStatisticsImageFilter.h"
+#include "itkImageRegionIteratorWithIndex.h"
 #include "itkScalarConnectedComponentImageFilter.h"
 
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkCommand.h>
+#include <vtkBoxWidget.h>
 #include <vtkImageData.h>
+#include <vtkImageIterator.h>
 #include <vtkImageActor.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkCellPicker.h>
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkProperty.h>
 #include <vtkResliceCursorPolyDataAlgorithm.h>
+#include <vtkImagePlaneWidget.h>
 #include <vtkSmartVolumeMapper.h>
 #include <vtkSmartPointer.h>
 #include <vtkCamera.h>
@@ -44,6 +54,7 @@
 #include "easylogging++.h"
 
 #include "Common.h"
+#include "BoxWidgetCallback.h"
 #include "Stage.h"
 
 namespace vis {
@@ -59,11 +70,12 @@ namespace vis {
       typedef itk::RelabelComponentImageFilter<
         LabelImage, LabelImage
       > RelabelFilter;
-      typedef itk::LabelToRGBImageFilter<LabelImage, ColorImage> ColorizeFilter;
-      typedef itk::ImageToVTKImageFilter<ColorImage> Converter;
+      typedef itk::ImageToVTKImageFilter<LabelImage> Converter;
       typedef itk::LabelStatisticsImageFilter<
         BaseImage, LabelImage
       > LabelStatistics;
+      typedef itk::Statistics::MersenneTwisterRandomVariateGenerator 
+        VariateGenerator;
 
     public:
       Quantifier();
@@ -85,6 +97,7 @@ namespace vis {
       vtkRenderer* m_renderer;
       vtkRenderWindowInteractor* m_interactor;
       Converter::Pointer m_converter;
+      VariateGenerator::Pointer m_rng;
 
       //UI
       QWidget* m_toolBox;
@@ -93,13 +106,13 @@ namespace vis {
       //blob detection
       BlobDetector::Pointer m_connector;
       RelabelFilter::Pointer m_relabel;
-      ColorizeFilter::Pointer m_colorize;
       LabelStatistics::Pointer m_statistics;
 
       // Volume rendering.
       vtkSmartVolumeMapper* m_mapper;
       vtkVolumeProperty* m_property;
       vtkVolume* m_volume;
+      vtkBoxWidget* m_box;
   };
 }
 
