@@ -11,6 +11,12 @@ namespace vis {
    */
   typedef signed short BasePixel;
   typedef itk::Image<BasePixel, 3> BaseImage;
+
+  typedef itk::RGBPixel<unsigned char> ColorPixel;
+  typedef itk::Image<ColorPixel, 3> ColorImage;
+
+  typedef unsigned int LabelPixel;
+  typedef itk::Image<LabelPixel, 3> LabelImage;
 }
 
 #endif

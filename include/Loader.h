@@ -29,7 +29,6 @@
 #include <vtkCommand.h>
 #include <vtkResliceCursorActor.h>
 #include <vtkResliceCursorThickLineRepresentation.h>
-#include <vtkImageMarchingCubes.h>
 #include <vtkSmartVolumeMapper.h>
 #include <vtkResliceCursorWidget.h>
 #include <vtkResliceCursorLineRepresentation.h>
@@ -76,7 +75,6 @@ namespace vis {
       void BuildToolbox();
       void BuildContent();
       void UpdateView();
-      //void UpdateWidgets();
 
     private:
       Reader::Pointer m_reader;

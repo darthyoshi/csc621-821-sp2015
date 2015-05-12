@@ -5,24 +5,27 @@ using namespace vis;
 Segmentor::Segmentor() : Stage() {
   // Initialize ITK pipeline objects.
   m_subtract = SubtractFilter::New();
-  m_erode  = ErodeFilter::New();
-  m_dilate = DilateFilter::New();
+  m_opening = OpeningFilter::New();
   m_converter = Converter::New();
-
-  m_structuringElement = StructuringElement();
   
-  m_erode->SetErodeValue( std::numeric_limits<signed short>::max() );
-  m_dilate->SetDilateValue( std::numeric_limits<signed short>::max() );
+  const unsigned int radius = 0;
+  m_kernel.SetRadius(radius);
+  m_kernel.CreateStructuringElement();
+
+  m_opening->SetBackgroundValue(std::numeric_limits<signed short>::min());
+  m_opening->SetForegroundValue(std::numeric_limits<signed short>::max());
 
   m_threshold = ThresholdFilter::New(); 
   m_threshold->SetOutsideValue(std::numeric_limits<signed short>::min());
   m_threshold->SetInsideValue(std::numeric_limits<signed short>::max());
+
   m_threshold->SetInput(m_subtract->GetOutput());
+  m_opening->SetInput(m_threshold->GetOutput());
+  m_converter->SetInput(m_threshold->GetOutput());
   
   // Initialize VTK pipeline and view objects.
   m_plane = vtkImagePlaneWidget::New();
 
-  m_openingRadius = 0;
   m_resetView = true;
 
   BuildToolbox();
@@ -45,7 +48,6 @@ void Segmentor::SetFixedImage(BaseImage::Pointer fixedImage){
 void Segmentor::SetMovingImage(BaseImage::Pointer movingImage){
   m_subtract->SetInput2(movingImage);
   m_resetView = true;
-  Segment();
 }
 
 void Segmentor::BuildToolbox() {
@@ -78,9 +80,25 @@ void Segmentor::BuildToolbox() {
   m_openingLabel = new QLabel(tr("-"));
   openingHeader->addWidget(openingSliderLabel);
   openingHeader->addWidget(m_openingLabel);
-  m_openingSlider = new QSlider();
-  m_openingSlider->setRange(0,5);
-  m_openingSlider->setOrientation(Qt::Orientation::Horizontal);
+  QSlider* openingSlider = new QSlider();
+  openingSlider->setRange(0,5);
+  openingSlider->setOrientation(Qt::Orientation::Horizontal);
+  m_openingButton = new QPushButton(tr("Apply Opening"));
+
+  QPushButton* finalizeButton = new QPushButton(tr("Finalize"));
+
+  pageLayout->addLayout(minHeader);
+  pageLayout->addWidget(m_minSlider);
+  pageLayout->addLayout(maxHeader);
+  pageLayout->addWidget(m_maxSlider);
+  pageLayout->addLayout(openingHeader);
+  pageLayout->addWidget(openingSlider);
+  pageLayout->addWidget(m_openingButton);
+  pageLayout->addWidget(finalizeButton);
+
+  m_toolBox->setLayout(pageLayout);
+
+  connect(finalizeButton, &QPushButton::pressed, this, &Segmentor::Segment);
 
   connect(m_minSlider, &QSlider::valueChanged, [=](int value) {
       auto upperThreshold = m_threshold->GetUpperThreshold();
@@ -89,12 +107,14 @@ void Segmentor::BuildToolbox() {
         m_minSlider->setValue((int)upperThreshold);
       } else {
         m_threshold->SetLowerThreshold((BasePixel)value);
-        Segment();
       }
 
       auto newMin = m_threshold->GetLowerThreshold();
       m_minLabel->setText(tr(std::to_string(newMin).c_str()));
+      m_mode = DisplayMode::THRESHOLD;
+      UpdateView();
   });
+
   connect(m_maxSlider, &QSlider::valueChanged, [=](int value) {
       auto lowerThreshold = m_threshold->GetLowerThreshold();
       if (value < m_threshold->GetLowerThreshold()) {
@@ -102,51 +122,33 @@ void Segmentor::BuildToolbox() {
         m_maxSlider->setValue((int)lowerThreshold);
       } else {
         m_threshold->SetUpperThreshold((BasePixel)value);
-        Segment();
       }
 
       auto newMax = m_threshold->GetUpperThreshold();
       m_maxLabel->setText(tr(std::to_string(newMax).c_str()));
+      m_mode = DisplayMode::THRESHOLD;
+      UpdateView();
   });
 
-  connect(m_openingSlider, &QSlider::valueChanged, [=](int value) {
-      m_openingRadius = value;
-      Segment();
-
+  connect(openingSlider, &QSlider::valueChanged, [=](int value) {
       m_openingLabel->setText(tr(std::to_string(value).c_str()));
+      m_kernel.SetRadius((unsigned int)value);
+      m_kernel.CreateStructuringElement();
+      m_opening->SetKernel(m_kernel);
   });
 
-  pageLayout->addLayout(minHeader);
-  pageLayout->addWidget(m_minSlider);
-  pageLayout->addLayout(maxHeader);
-  pageLayout->addWidget(m_maxSlider);
-  pageLayout->addLayout(openingHeader);
-  pageLayout->addWidget(m_openingSlider);
-
-  m_toolBox->setLayout(pageLayout);
+  connect(m_openingButton, &QPushButton::pressed, [=] {
+    m_openingButton->setDisabled(true);
+    m_mode = DisplayMode::OPENING;
+    UpdateView();
+    m_openingButton->setDisabled(false);
+  });
 }
 
 // Run the actual segmentation process here.
 void Segmentor::Segment() {
-  if (m_openingRadius > 0) {
-    m_structuringElement.SetRadius( m_openingRadius );
-    m_structuringElement.CreateStructuringElement();
-    m_erode->SetKernel(  m_structuringElement );
-    m_dilate->SetKernel( m_structuringElement );
-
-    m_erode->SetInput(m_threshold->GetOutput());
-    m_dilate->SetInput(m_erode->GetOutput());
-
-    m_dilate->Update();
-    m_converter->SetInput(m_dilate->GetOutput());
-    emit SegmentationComplete(m_dilate->GetOutput());
-  } else {
-    m_threshold->Update();
-    m_converter->SetInput(m_threshold->GetOutput());
-    emit SegmentationComplete(m_threshold->GetOutput());
-  }
-  
-  UpdateView();
+  m_opening->Update();
+  emit SegmentationComplete(m_opening->GetOutput());
 }
 
 void Segmentor::BuildContent() {
@@ -189,14 +191,20 @@ void Segmentor::BuildContent() {
 }
 
 void Segmentor::UpdateView() {
-  int curr_slice = m_plane->GetSliceIndex();
+  auto slice = m_plane->GetSliceIndex();
+  if (m_mode == DisplayMode::THRESHOLD) {
+    m_converter->SetInput(m_threshold->GetOutput());
+  } else {
+    m_converter->SetInput(m_opening->GetOutput());
+  }
   m_converter->Update();
 
   m_plane->SetInputData(m_converter->GetOutput());
   if (m_resetView) {
-    m_plane->SetSliceIndex((int)(m_converter->GetOutput()->GetDimensions()[0] / 2.0));
+    auto dimensions = m_converter->GetOutput()->GetDimensions();
+    m_plane->SetSliceIndex((int)(dimensions[0] / 2.0));
   } else {
-    m_plane->SetSliceIndex(curr_slice);
+    m_plane->SetSliceIndex(slice);
   }
 
   m_plane->UpdatePlacement();

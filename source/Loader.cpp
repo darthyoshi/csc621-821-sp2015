@@ -1,42 +1,6 @@
 #include <Visualize.h>
 #include "Loader.h"
 
-namespace vis {
-  class vtkPlaneCallback : public vtkCommand {
-    public:
-      static vtkPlaneCallback* New() {
-        return new vtkPlaneCallback;
-      }
-
-      void Execute(vtkObject* caller, unsigned long ev, void* callData) {
-        vtkImagePlaneWidget* ipw = dynamic_cast<vtkImagePlaneWidget*>(caller);
-        if (ipw) {
-          double* wl = static_cast<double*>(callData);
-
-          if (ipw == this->planes[0]) {
-            this->planes[1]->SetWindowLevel(wl[0], wl[1]);
-            this->planes[2]->SetWindowLevel(wl[0], wl[1]);
-          } else if (ipw == this->planes[1]) {
-            this->planes[0]->SetWindowLevel(wl[0], wl[1]);
-            this->planes[2]->SetWindowLevel(wl[0], wl[1]);
-          } else if (ipw == this->planes[2]) {
-            this->planes[0]->SetWindowLevel(wl[0], wl[1]);
-            this->planes[1]->SetWindowLevel(wl[0], wl[1]);
-          }
-        }
-
-        for (int i = 0; i < 3; i++) {
-          this->planes[i]->UpdatePlacement();
-        }
-      
-        this->planes[0]->GetInteractor()->GetRenderWindow()->Render();
-      }
-
-      vtkPlaneCallback() {}
-      vtkImagePlaneWidget* planes[3];
-  };
-}
-
 using namespace vis;
 
 Loader::Loader() : Stage() {
@@ -92,7 +56,6 @@ void Loader::BuildContent() {
   m_interactor = m_view->GetInteractor();
 
   // Setup windowing callback.
-  vtkPlaneCallback* cb = vtkPlaneCallback::New();
   vtkProperty* prop = vtkProperty::New();
   vtkCellPicker* picker = vtkCellPicker::New();
 
@@ -105,9 +68,6 @@ void Loader::BuildContent() {
     
     double color[3] = { 0, 0, 0 };
     color[i] = 1;
-
-    cb->planes[i] = m_planes[i];
-    m_planes[i]->AddObserver(vtkCommand::WindowLevelEvent, cb);
 
     m_planes[i]->GetPlaneProperty()->SetColor(color);
     m_planes[i]->GetPlaneProperty()->BackfaceCullingOff();
