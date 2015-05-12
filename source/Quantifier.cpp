@@ -86,9 +86,9 @@ void Quantifier::UpdateInterface() {
 
     QPixmap pixmap(30, 30);
     QColor color;
-    color.setRed(m_color->GetRedValue((double)value));
-    color.setGreen(m_color->GetGreenValue((double)value));
-    color.setBlue(m_color->GetBlueValue((double)value));
+    color.setRed(255.0*m_color->GetRedValue((double)value));
+    color.setGreen(255.0*m_color->GetGreenValue((double)value));
+    color.setBlue(255.0*m_color->GetBlueValue((double)value));
     pixmap.fill(color);
 
     QIcon icon(pixmap);
@@ -102,7 +102,7 @@ void Quantifier::UpdateInterface() {
 void Quantifier::SelectComponent(int index) {
   LabelPixel label = m_combo->itemData(index).toUInt();
   if (m_lastSelected != 0) {
-    m_opacity->AddPoint((double)m_lastSelected, 0.1, 0.0, 1.0);
+    m_opacity->AddPoint((double)m_lastSelected, 0.1, 0.5, 1.0);
   }
 
   m_idLabel->setText(QString::number(label));
@@ -111,7 +111,7 @@ void Quantifier::SelectComponent(int index) {
   m_varianceLabel->setText(QString::number(m_statistics->GetVariance(label)));
   m_sumLabel->setText(QString::number(m_statistics->GetSum(label)));
   m_sizeLabel->setText(QString::number(m_relabel->GetSizeOfObjectInPhysicalUnits(label)));
-  m_opacity->AddPoint((double)label, 1.0, 0.0, 1.0);
+  m_opacity->AddPoint((double)label, 1.0, 0.5, 1.0);
   m_view->GetRenderWindow()->Render();
   m_lastSelected = label;
 }
@@ -139,23 +139,23 @@ void Quantifier::BuildContent() {
   m_mapper->SetRequestedRenderModeToRayCast();
 
   m_color = vtkColorTransferFunction::New();
-  m_color->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
-  m_color->AddRGBPoint(1.0, 0.0, 0.0, 0.0);
+  m_color->AddRGBPoint(0.0, 0.0, 0.0, 0.0, 0.5, 1.0);
+  m_color->AddRGBPoint(1.0, 0.0, 0.0, 0.0, 0.5, 1.0);
   for (unsigned int i = 2; i < 100; i++) {
     double color[3];
-    color[0] = m_rng->GetUniformVariate(0.0, 255.0);
-    color[1] = m_rng->GetUniformVariate(0.0, 255.0);
-    color[2] = m_rng->GetUniformVariate(0.0, 255.0);
+    color[0] = (m_rng->GetUniformVariate(0.0, 1.0));
+    color[1] = (m_rng->GetUniformVariate(0.0, 1.0));
+    color[2] = (m_rng->GetUniformVariate(0.0, 1.0));
 
     m_color->AddRGBPoint((double)i, 
-      color[0], color[1], color[2]);
+      color[0], color[1], color[2], 0.5, 1.0);
   }
 
   m_opacity = vtkPiecewiseFunction::New();
-  m_opacity->AddPoint(0.0, 0.0, 0.0, 1.0);
-  m_opacity->AddPoint(1.0, 0.0, 0.0, 1.0);
+  m_opacity->AddPoint(0.0, 0.0, 0.5, 1.0);
+  m_opacity->AddPoint(1.0, 0.0, 0.5, 1.0);
   for (int i = 2; i < 100; i++) {
-    m_opacity->AddPoint((double)i, 0.1, 0.0, 1.0);
+    m_opacity->AddPoint((double)i, 0.1, 0.5, 1.0);
   }
 
   m_property = vtkVolumeProperty::New();
