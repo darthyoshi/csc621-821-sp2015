@@ -1,7 +1,10 @@
 #ifndef BOX_WIDGET_CALLBACK_H
 #define BOX_WIDGET_CALLBACK_H
 
-#include "vtkBoxWidget.h"
+#include "vtkBoxWidget2.h"
+#include "vtkBoxRepresentation.h"
+#include "vtkSmartVolumeMapper.h"
+#include "vtkPolyData.h"
 #include "vtkPlanes.h"
 #include "vtkCommand.h"
 
@@ -11,12 +14,14 @@ namespace vis {
       static BoxWidgetCallback* New() { return new BoxWidgetCallback; }
 
       virtual void Execute(vtkObject* caller, unsigned long, void*) {
-        vtkBoxWidget* widget = reinterpret_cast<vtkBoxWidget*>(caller);
+        vtkBoxWidget2* widget = reinterpret_cast<vtkBoxWidget2*>(caller);
         if (this->mapper) {
           vtkPlanes* planes = vtkPlanes::New();
-          widget->GetPlanes(planes);
-          this->mapper->SetClippingPlanes(planes);
-          planes->Delete();
+          auto representation = static_cast<
+            vtkBoxRepresentation*
+          >(widget->GetRepresentation());
+          representation->GetPlanes(planes);
+          mapper->SetClippingPlanes(planes);
         }
       }
 

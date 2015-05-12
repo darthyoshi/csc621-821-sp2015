@@ -1,3 +1,4 @@
+#include <Visualize.h>
 #include "Quantifier.h"
 
 using namespace vis;
@@ -30,8 +31,91 @@ void Quantifier::BuildToolbox() {
   m_toolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
   QVBoxLayout* pageLayout = new QVBoxLayout();
 
+  m_combo = new QComboBox();
+  pageLayout->addWidget(m_combo);
+
+  QGroupBox* groupBox = new QGroupBox(tr("Label Statistics"));
+  QGridLayout* layout = new QGridLayout();
+
+  QLabel* id = new QLabel(tr("<b>Component ID:</b>"));
+  m_idLabel = new QLabel(tr("-"));
+  layout->addWidget(id, 1, 0);
+  layout->addWidget(m_idLabel, 1, 1);
+  
+  QLabel* mean = new QLabel(tr("<b>Mean:</b>"));
+  m_meanLabel = new QLabel(tr("-"));
+  layout->addWidget(mean, 2, 0);
+  layout->addWidget(m_meanLabel, 2, 1);
+
+  QLabel* sigma = new QLabel(tr("<b>Sigma:</b>"));
+  m_sigmaLabel = new QLabel(tr("-"));
+  layout->addWidget(sigma, 3, 0);
+  layout->addWidget(m_sigmaLabel, 3, 1);
+
+  QLabel* variance = new QLabel(tr("<b>Variance:</b>"));
+  m_varianceLabel = new QLabel(tr("-"));
+  layout->addWidget(variance, 4, 0);
+  layout->addWidget(m_varianceLabel, 4, 1);
+
+  QLabel* sum = new QLabel(tr("<b>Sum:</b>"));
+  m_sumLabel = new QLabel(tr("-"));
+  layout->addWidget(sum, 5, 0);
+  layout->addWidget(m_sumLabel, 5, 1);
+
+  QLabel* size = new QLabel(tr("<b>Size:</b>"));
+  m_sizeLabel = new QLabel(tr("-"));
+  layout->addWidget(size, 6, 0);
+  layout->addWidget(m_sizeLabel, 6, 1);
+
+  groupBox->setLayout(layout);
+  pageLayout->addWidget(groupBox);
   m_toolBox->setLayout(pageLayout);
 }
+
+void Quantifier::UpdateInterface() {
+  m_combo->clear();
+
+  typedef typename LabelSet::const_iterator LabelIterator;
+  LabelSet labelSet = m_statistics->GetValidLabelValues();
+  LabelIterator it = labelSet.begin();
+
+  for (; it != labelSet.end(); ++it) {
+    if (!m_statistics->HasLabel(*it)) continue;
+
+    LabelPixel value = *it;
+
+    QPixmap pixmap(30, 30);
+    QColor color;
+    color.setRed(m_color->GetRedValue((double)value));
+    color.setGreen(m_color->GetGreenValue((double)value));
+    color.setBlue(m_color->GetBlueValue((double)value));
+    pixmap.fill(color);
+
+    QIcon icon(pixmap);
+
+    m_combo->addItem(icon, QString::fromStdString(std::to_string(value)), value);
+  }
+
+  connect(m_combo, SIGNAL(activated(int)), this, SLOT(SelectComponent(int)));
+}
+
+void Quantifier::SelectComponent(int index) {
+  LabelPixel label = m_combo->itemData(index).toUInt();
+  if (m_lastSelected != 0) {
+    m_opacity->AddPoint((double)m_lastSelected, 0.1, 0.0, 1.0);
+  }
+
+  m_idLabel->setText(QString::number(label));
+  m_meanLabel->setText(QString::number(m_statistics->GetMean(label)));
+  m_sigmaLabel->setText(QString::number(m_statistics->GetSigma(label)));
+  m_varianceLabel->setText(QString::number(m_statistics->GetVariance(label)));
+  m_sumLabel->setText(QString::number(m_statistics->GetSum(label)));
+  m_sizeLabel->setText(QString::number(m_relabel->GetSizeOfObjectInPhysicalUnits(label)));
+  m_opacity->AddPoint((double)label, 1.0, 0.0, 1.0);
+  m_view->GetRenderWindow()->Render();
+  m_lastSelected = label;
+}
+
 
 void Quantifier::BuildContent() {
   // Create the main VTK view.
@@ -40,46 +124,62 @@ void Quantifier::BuildContent() {
 
   // Setup interaction and rendering.
   m_view->GetRenderWindow()->AddRenderer(m_renderer);
+  m_view->GetRenderWindow()->SetAlphaBitPlanes(true);
+  m_view->GetRenderWindow()->SetMultiSamples(0);
+  m_renderer->SetUseDepthPeeling(true);
+  m_renderer->SetMaximumNumberOfPeels(100);
+  m_renderer->SetOcclusionRatio(0.1);
   m_interactor = m_view->GetInteractor();
+
+  m_renderer->Render();
+  CLOG(INFO, "quant") << "Depth Peeling: " << m_renderer->GetLastRenderingUsedDepthPeeling();
 
   m_mapper = vtkSmartVolumeMapper::New();
   m_mapper->SetBlendModeToMaximumIntensity();
   m_mapper->SetRequestedRenderModeToRayCast();
 
-  vtkColorTransferFunction* colorFunc = vtkColorTransferFunction::New();
-  colorFunc->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
-  for (unsigned int i = 1; i < 100; i++) {
+  m_color = vtkColorTransferFunction::New();
+  m_color->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+  m_color->AddRGBPoint(1.0, 0.0, 0.0, 0.0);
+  for (unsigned int i = 2; i < 100; i++) {
     double color[3];
     color[0] = m_rng->GetUniformVariate(0.0, 255.0);
     color[1] = m_rng->GetUniformVariate(0.0, 255.0);
     color[2] = m_rng->GetUniformVariate(0.0, 255.0);
 
-    colorFunc->AddRGBPoint((double)i, 
+    m_color->AddRGBPoint((double)i, 
       color[0], color[1], color[2]);
   }
 
-  vtkPiecewiseFunction* opacityFunc = vtkPiecewiseFunction::New();
-  opacityFunc->AddSegment(0.0, 0.0, 1.0, 0.0);
-  opacityFunc->AddSegment(1.1, 0.2, 100.0, 0.5);
+  m_opacity = vtkPiecewiseFunction::New();
+  m_opacity->AddPoint(0.0, 0.0, 0.0, 1.0);
+  m_opacity->AddPoint(1.0, 0.0, 0.0, 1.0);
+  for (int i = 2; i < 100; i++) {
+    m_opacity->AddPoint((double)i, 0.1, 0.0, 1.0);
+  }
 
   m_property = vtkVolumeProperty::New();
   m_property->ShadeOff();
-  m_property->SetColor(colorFunc);
-  m_property->SetScalarOpacity(opacityFunc);
+  m_property->SetColor(m_color);
+  m_property->SetScalarOpacity(m_opacity);
   m_property->SetInterpolationTypeToNearest();
+  m_property->SetScalarOpacityUnitDistance(1.0);
   m_property->SetIndependentComponents(true);
 
   m_volume = vtkVolume::New();
   m_volume->SetMapper(m_mapper);
   m_volume->SetProperty(m_property);
 
+  m_view->GetRenderWindow()->Render();
+  m_interactor->Initialize();
+  m_view->GetRenderWindow()->Render();
+
   // Set render background.
   m_renderer->GradientBackgroundOn();
   m_renderer->SetBackground(0.2, 0.2, 0.2);
   m_renderer->SetBackground2(0.0, 0.0, 0.0);
   m_renderer->AddVolume(m_volume);
-  m_renderer->ResetCamera();
-  m_renderer->Render();
+  m_view->GetRenderWindow()->Render();
 }
 
 void Quantifier::SetImage(BaseImage::Pointer image) {
@@ -90,6 +190,7 @@ void Quantifier::SetImage(BaseImage::Pointer image) {
 
 void Quantifier::Quantify() {
   m_statistics->Update();
+  UpdateInterface();
   UpdateView();
 }
 

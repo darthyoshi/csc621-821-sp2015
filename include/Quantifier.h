@@ -4,9 +4,11 @@
 #include <QWidget>
 #include <QObject>
 #include <QGridLayout>
+#include <QComboBox>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QSlider>
+#include <QColor>
+#include <QSlider> 
 #include <QGroupBox>
 #include <QPushButton>
 #include <QAbstractState>
@@ -35,7 +37,7 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkCommand.h>
-#include <vtkBoxWidget.h>
+#include <vtkBoxWidget2.h>
 #include <vtkImageData.h>
 #include <vtkImageIterator.h>
 #include <vtkImageActor.h>
@@ -77,6 +79,7 @@ namespace vis {
       > LabelStatistics;
       typedef itk::Statistics::MersenneTwisterRandomVariateGenerator 
         VariateGenerator;
+      typedef typename LabelStatistics::ValidLabelValuesContainerType LabelSet;
 
     public:
       Quantifier();
@@ -86,11 +89,13 @@ namespace vis {
 
     public slots:
       void SetImage(BaseImage::Pointer);
+      void SelectComponent(int index);
 
     protected:
       void BuildToolbox();
       void BuildContent();
       void Quantify();
+      void UpdateInterface();
       void UpdateView();
 
     private:
@@ -103,6 +108,16 @@ namespace vis {
       //UI
       QWidget* m_toolBox;
       QVTKWidget* m_view;
+      QComboBox* m_combo;
+
+      QLabel* m_idLabel;
+      QLabel* m_meanLabel;
+      QLabel* m_sigmaLabel;
+      QLabel* m_varianceLabel;
+      QLabel* m_sumLabel;
+      QLabel* m_sizeLabel;
+
+      LabelPixel m_lastSelected = 0;
 
       //blob detection
       BlobDetector::Pointer m_connector;
@@ -112,8 +127,10 @@ namespace vis {
       // Volume rendering.
       vtkSmartVolumeMapper* m_mapper;
       vtkVolumeProperty* m_property;
+      vtkColorTransferFunction* m_color;
+      vtkPiecewiseFunction* m_opacity;
       vtkVolume* m_volume;
-      vtkBoxWidget* m_box;
+      vtkBoxWidget2* m_box;
   };
 }
 
