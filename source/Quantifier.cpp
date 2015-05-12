@@ -14,8 +14,9 @@ Quantifier::Quantifier() : Stage() {
   m_statistics->SetLabelInput(m_relabel->GetOutput());
   m_converter->SetInput(m_relabel->GetOutput());
 
+  m_connector->SetBackgroundValue(0);
   m_connector->SetDistanceThreshold(4);
-  m_relabel->SetMinimumObjectSize(4);
+  m_relabel->SetMinimumObjectSize(10);
   m_statistics->UseHistogramsOn();
 
   BuildToolbox();
@@ -46,23 +47,26 @@ void Quantifier::BuildContent() {
   m_mapper->SetRequestedRenderModeToRayCast();
 
   vtkColorTransferFunction* colorFunc = vtkColorTransferFunction::New();
-  colorFunc->AddRGBSegment(0.0, 1.0, 1.0, 1.0, 20000.0, 1.0, 0.5, 0.75);
-  /*
-  for (int i = 0; i < 55; i++) {
-    colorFunc->AddRGBPoint((double)i * 5.0, 
-      m_rng->GetUniformVariate(0.0, 255.0),
-      m_rng->GetUniformVariate(0.0, 255.0),
-      m_rng->GetUniformVariate(0.0, 255.0));
+  colorFunc->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+  for (unsigned int i = 1; i < 100; i++) {
+    double color[3];
+    color[0] = m_rng->GetUniformVariate(0.0, 255.0);
+    color[1] = m_rng->GetUniformVariate(0.0, 255.0);
+    color[2] = m_rng->GetUniformVariate(0.0, 255.0);
+
+    colorFunc->AddRGBPoint((double)i, 
+      color[0], color[1], color[2]);
   }
-  */
 
   vtkPiecewiseFunction* opacityFunc = vtkPiecewiseFunction::New();
-  opacityFunc->AddSegment(0.0, 0.2, 255.0, 0.2);
+  opacityFunc->AddSegment(0.0, 0.0, 1.0, 0.0);
+  opacityFunc->AddSegment(1.1, 0.2, 100.0, 0.5);
 
   m_property = vtkVolumeProperty::New();
+  m_property->ShadeOff();
   m_property->SetColor(colorFunc);
   m_property->SetScalarOpacity(opacityFunc);
-  m_property->SetInterpolationTypeToLinear();
+  m_property->SetInterpolationTypeToNearest();
   m_property->SetIndependentComponents(true);
 
   m_volume = vtkVolume::New();
@@ -94,16 +98,14 @@ void Quantifier::UpdateView() {
   m_converter->Update();
   m_converter->GetOutput()->PrintSelf(std::cout, vtkIndent());
   
-  auto outImage = m_converter->GetOutput();
-  for (int i = 0; i < 1000; i++) {
-
-  }
+  CLOG(INFO, "quant") << "Label Count: "
+    << std::to_string(m_statistics->GetNumberOfLabels());
 
   m_mapper->SetInputData(m_converter->GetOutput());
   m_mapper->Update();
 
   m_renderer->ResetCamera();
-  m_renderer->Render();
+  m_view->GetRenderWindow()->Render();
 }
 
 QWidget* Quantifier::GetContent() {

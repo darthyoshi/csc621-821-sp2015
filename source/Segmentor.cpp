@@ -12,11 +12,11 @@ Segmentor::Segmentor() : Stage() {
   m_kernel.SetRadius(radius);
   m_kernel.CreateStructuringElement();
 
-  m_opening->SetBackgroundValue(std::numeric_limits<signed short>::min());
+  m_opening->SetBackgroundValue(0);
   m_opening->SetForegroundValue(std::numeric_limits<signed short>::max());
 
   m_threshold = ThresholdFilter::New(); 
-  m_threshold->SetOutsideValue(std::numeric_limits<signed short>::min());
+  m_threshold->SetOutsideValue(0);
   m_threshold->SetInsideValue(std::numeric_limits<signed short>::max());
 
   m_threshold->SetInput(m_subtract->GetOutput());

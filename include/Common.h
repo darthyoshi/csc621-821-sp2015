@@ -16,7 +16,7 @@ namespace vis {
   typedef itk::RGBPixel<unsigned char> ColorPixel;
   typedef itk::Image<ColorPixel, 3> ColorImage;
 
-  typedef unsigned char LabelPixel;
+  typedef unsigned int LabelPixel;
   typedef itk::Image<LabelPixel, 3> LabelImage;
 }
 

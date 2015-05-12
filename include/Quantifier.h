@@ -25,6 +25,7 @@
 #include "itkLabelToRGBImageFilter.h"
 #include "itkCastImageFilter.h"
 #include "itkRelabelComponentImageFilter.h"
+#include "itkLabelStatisticsImageFilter.h"
 #include "itkMersenneTwisterRandomVariateGenerator.h"
 #include "itkLabelStatisticsImageFilter.h"
 #include "itkImageRegionIteratorWithIndex.h"
