@@ -101,8 +101,11 @@ void Quantifier::UpdateInterface() {
 
 void Quantifier::SelectComponent(int index) {
   LabelPixel label = m_combo->itemData(index).toUInt();
-  if (m_lastSelected != 0) {
-    m_opacity->AddPoint((double)m_lastSelected, 0.1, 0.5, 1.0);
+  if (m_lastSelected != 0 && m_lastSelected != 1) {
+    m_opacity->AddPoint((double)m_lastSelected, 0.2, 0.5, 1.0);
+  }
+  else {
+    m_opacity->AddPoint((double)m_lastSelected, 0.0, 0.5, 1.0);
   }
 
   m_idLabel->setText(QString::number(label));
@@ -155,7 +158,7 @@ void Quantifier::BuildContent() {
   m_opacity->AddPoint(0.0, 0.0, 0.5, 1.0);
   m_opacity->AddPoint(1.0, 0.0, 0.5, 1.0);
   for (int i = 2; i < 100; i++) {
-    m_opacity->AddPoint((double)i, 0.1, 0.5, 1.0);
+    m_opacity->AddPoint((double)i, 0.2, 0.5, 1.0);
   }
 
   m_property = vtkVolumeProperty::New();
